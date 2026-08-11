@@ -54,7 +54,7 @@ if (isInit) {
     await mkdir(skillsDir, { recursive: true });
     await writeFile(
       join(skillsDir, "SKILL.md"),
-      "# My Agent Skills\n\n<!-- Add your agent instructions here -->\n\n## Overview\n\nDescribe what your agent does.\n",
+      "# My Agent Skills\n\n<!-- Add your skill instructions here -->\n",
       "utf-8"
     );
     console.log(`✔ ${msg("initCreateSkills")}`);
