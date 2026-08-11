@@ -52,7 +52,7 @@ const rules = skill("/react/rules/state.md");
 
 ![Skill hover 摘要](assets/hover-tip-a.png)
 
-hover 卡片还会展示编译后的运行时估算，包括常用、P95 和最大 token 预算。
+hover 下半部分展示预计编译后的字符数和 token，并标注节省比例。
 
 ![Skill hover token 统计](assets/hover-tip-b.png)
 

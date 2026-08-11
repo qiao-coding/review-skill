@@ -58,8 +58,8 @@ file, file count, character count, and token estimate.
 
 ![skill hover summary](assets/hover-tip-a.png)
 
-The hover card also shows compiled runtime estimates, including typical, P95,
-and maximum token budgets for the skill.
+The hover card also shows estimated post-build character count, tokens, and
+the percentage saved.
 
 ![skill hover token stats](assets/hover-tip-b.png)
 
