@@ -2,7 +2,7 @@
 
 Turn Markdown Agent Skills into type-safe, token-aware runtime artifacts.
 
-![review overview](assets/review-overview.png)
+![review overview](assets/review-skill-overview.png)
 
 Language: English | [简体中文](README.zh-CN.md)
 

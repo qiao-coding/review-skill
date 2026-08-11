@@ -2,7 +2,7 @@
 
 把 Markdown 编写的 Agent Skill 编译成类型安全、可统计 token、可直接运行的产物。
 
-![review 项目概览](assets/review-overview.png)
+![review 项目概览](assets/review-skill-overview.png)
 
 语言：[English](README.md) | 简体中文
 
