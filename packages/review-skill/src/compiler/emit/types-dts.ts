@@ -73,7 +73,10 @@ export async function emitTypesDts(
       lines.push(` * - ${pad(L.files, labelW - 2)} ${entry.files.toLocaleString()}`);
     }
     lines.push(` * - ${pad(L.characters, labelW - 2)} ${entry.runtime.characters.toLocaleString()}`);
-    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${entry.runtime.tokens.toLocaleString()}`);
+    const rt = entry.runtime.tokens;
+    const sr = entry.source.tokens;
+    const pct = sr > 0 ? ((1 - rt / sr) * 100).toFixed(1) : "0.0";
+    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()} (-${pct}%)`);
     lines.push(" */");
     return lines.join("\n");
   }
