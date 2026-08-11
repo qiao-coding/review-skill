@@ -1,8 +1,8 @@
-# review
+# review-skill
 
-Turn Markdown Agent Skills into type-safe, token-aware runtime artifacts.
+Compile Markdown Agent Skills into type-safe, token-aware runtime artifacts.
 
-![review overview](assets/review-skill-overview.png)
+![review-skill overview](assets/review-skill-overview.png)
 
 Language: English | [简体中文](README.zh-CN.md)
 
@@ -12,85 +12,96 @@ Language: English | [简体中文](README.zh-CN.md)
 - [Quick start](#quick-start)
 - [Agent framework integrations](#agent-framework-integrations)
 
-`review` helps developers manage agent instructions like application
-assets. You write reusable skills in Markdown, compile them into optimized
-runtime files, and consume them through a generated TypeScript API.
+`review-skill` helps developers manage agent instructions like application
+assets. Write reusable skills in Markdown, compile them once, and consume them
+from TypeScript through the generated `@review-skill/skill` path alias.
 
 ## Features
 
-### Markdown-first skill authoring
+### 1. Write skills as Markdown
 
-Write agent behavior in plain Markdown, keep it in your repository, and review
-it like code.
+Keep agent behavior in a clear `skills/` directory. Human-readable Markdown
+stays in source control; generated runtime files stay in `.skill/`.
 
 ```text
 skills/
 |-- SKILL.md
-`-- review/
+|-- react/
+|   |-- SKILL.md
+|   `-- rules/
+|       |-- effects.md
+|       `-- state.md
+`-- security/
     |-- SKILL.md
-    `-- rules.md
+    `-- owasp.md
 ```
 
-### Type-safe skill references
+### 2. Autocomplete every skill path
 
-Use generated `skill()` references instead of fragile relative file paths.
+After compilation, `skill("/")` and every nested skill/resource path are
+available to your editor. You no longer need to hand-write fragile relative
+`readFile(...)` paths.
+
+![skill path autocomplete](assets/router-tip.png)
 
 ```ts
-const review = skill("/review");
-const rules = skill("/review/rules.md");
+import { skill } from "@review-skill/skill";
+
+const root = skill("/");
+const rules = skill("/react/rules/state.md");
 ```
 
-### Token-aware runtime content
+### 3. See skill metadata on hover
 
-Build-time optimization removes prompt noise outside code blocks, including
-comments, decorative formatting, image syntax, extra blank lines, and trailing
-whitespace.
+Hover any generated `skill()` call to see the skill title, description, source
+file, file count, character count, and token estimate.
 
-### Framework-independent output
+![skill hover summary](assets/hover-tip-a.png)
 
-Compiled skills are plain Markdown, so you can pass them into LangChain, Mastra,
-the Vercel AI SDK, the OpenAI SDK, or your own agent runtime.
+The hover card also shows compiled runtime estimates, including typical, P95,
+and maximum token budgets for the skill.
 
-### Developer workflow
+![skill hover token stats](assets/hover-tip-b.png)
 
-Initialize a skill directory, compile skills once, or watch files during local
-development.
+### 4. Ship optimized prompt content
 
-```bash
-npx review-skill --init
-npx review-skill
-npx review-skill --watch
-```
+`review-skill` removes prompt noise outside code blocks, including comments,
+formatting markers, image syntax, extra blank lines, and trailing whitespace.
+Code examples stay intact.
+
+### 5. Use the output in any agent stack
+
+Compiled resources are plain Markdown strings, so they can be used as system
+prompts, developer instructions, tool rules, review policies, or RAG chunks.
 
 ## Quick start
 
 ### 1. Install
 
 ```bash
-npm install review
+npm install review-skill
 ```
 
-### 2. Initialize skills
+### 2. Initialize
 
 ```bash
 npx review-skill --init
 ```
 
-This creates an initial `skills/SKILL.md` and adds `.skill/` to `.gitignore`.
+This creates `skills/SKILL.md`, adds `.skill/` to `.gitignore`, generates
+`skill.config.js` or `skill.config.mjs`, configures the `@review-skill/skill`
+TypeScript path alias, and adds useful npm scripts when possible.
 
 ### 3. Write a skill
 
 ```markdown
-# Code Review
+# React Code Review
 
-<!-- Internal note: expand security checks later. -->
+You are an expert React reviewer. Focus on correctness, state management,
+effects, rendering performance, and security-sensitive patterns.
 
-## State Management
-
-- Avoid derived state when it can be calculated during render.
-- Keep state close to the component or workflow that owns it.
-
-See `skill("/review/rules.md")` for detailed review rules.
+See `skill("/react/rules/state.md")` for state rules.
+See `skill("/react/rules/effects.md")` for effect rules.
 ```
 
 ### 4. Compile
@@ -99,11 +110,18 @@ See `skill("/review/rules.md")` for detailed review rules.
 npx review-skill
 ```
 
+Or use the generated scripts:
+
+```bash
+npm run skill:build
+npm run skill:dev
+```
+
 Example output:
 
 ```text
-Compiled 3 files in 45ms
-  2 skills | Source 1456 -> Runtime 1194 tokens | -18.0%
+Compiled 6 files in 91ms
+  3 skills | Source 2145 -> Runtime 1751 tokens | -18.4%
 ```
 
 ### 5. Use the generated runtime
@@ -111,7 +129,10 @@ Compiled 3 files in 45ms
 ```ts
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
+const rules = skill("/react/rules/state.md");
+
+console.log(rules.meta.title);
+console.log(rules.meta.runtime.tokens);
 
 const markdown = await rules.read();
 ```
@@ -126,13 +147,12 @@ Use a compiled skill resource as the system message.
 import { ChatOpenAI } from "@langchain/openai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
-
+const rules = skill("/react/rules/state.md");
 const llm = new ChatOpenAI({ model: "gpt-4o" });
 
 const result = await llm.invoke([
   { role: "system", content: await rules.read() },
-  { role: "user", content: `Review this code:\n\`\`\`ts\n${userCode}\n\`\`\`` },
+  { role: "user", content: `Review this code:\n\`\`\`tsx\n${userCode}\n\`\`\`` },
 ]);
 ```
 
@@ -144,9 +164,8 @@ Use compiled Markdown as agent instructions.
 import { Agent } from "@mastra/core";
 import { skill } from "@review-skill/skill";
 
-const review = skill("/review");
-const rules = skill("/review/rules.md");
-
+const review = skill("/react");
+const rules = skill("/react/rules/state.md");
 
 const agent = new Agent({
   name: review.meta.title,
@@ -163,7 +182,7 @@ Pass compiled Markdown into `system`.
 import { generateText } from "ai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
+const rules = skill("/react/rules/state.md");
 
 const { text } = await generateText({
   model: "openai/gpt-4o",
@@ -180,8 +199,7 @@ Use compiled Markdown as the developer instruction.
 import OpenAI from "openai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
-
+const rules = skill("/react/rules/state.md");
 const client = new OpenAI();
 
 const response = await client.responses.create({
@@ -195,17 +213,15 @@ const response = await client.responses.create({
 
 ### Custom agent
 
-Read a compiled resource and pass the string to your own prompt builder.
+Read a compiled resource and pass the Markdown string to your own prompt builder.
 
 ```ts
 import { skill } from "@review-skill/skill";
 
-const guide = skill("/my-skill/guide.md");
+const guide = skill("/security/owasp.md");
 
 agent.setSystemPrompt(await guide.read());
 ```
-
-## License
 
 ## Links
 

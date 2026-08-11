@@ -1,8 +1,8 @@
-# review
+# review-skill
 
 把 Markdown 编写的 Agent Skill 编译成类型安全、可统计 token、可直接运行的产物。
 
-![review 项目概览](assets/review-skill-overview.png)
+![review-skill 项目概览](assets/review-skill-overview.png)
 
 语言：[English](README.md) | 简体中文
 
@@ -12,78 +12,84 @@
 - [快速开始](#快速开始)
 - [不同 Agent 框架如何接入](#不同-agent-框架如何接入)
 
-`review` 帮开发者把 Agent 指令当成真正的工程资产来管理。你可以用 Markdown 编写可复用 Skill，把它们编译成更适合运行时使用的文件，然后通过生成的 TypeScript API 在 Agent 应用里安全引用。
+`review-skill` 帮开发者把 Agent 指令当成工程资产来管理。你用 Markdown 编写可复用 Skill，编译一次，然后在 TypeScript 中通过生成的 `@review-skill/skill` 路径别名安全引用。
 
 ## 功能介绍
 
-### 用 Markdown 编写 Skill
+### 1. 用 Markdown 编写 Skill
 
-用普通 Markdown 维护 Agent 行为，把指令放进代码仓库，并像审查代码一样审查它。
+把 Agent 行为放在清晰的 `skills/` 目录中。源码里的 Markdown 保持可读，生成的运行时产物放在 `.skill/` 中。
 
 ```text
 skills/
 |-- SKILL.md
-`-- review/
+|-- react/
+|   |-- SKILL.md
+|   `-- rules/
+|       |-- effects.md
+|       `-- state.md
+`-- security/
     |-- SKILL.md
-    `-- rules.md
+    `-- owasp.md
 ```
 
-### 类型安全地引用 Skill
+### 2. 自动补全所有 Skill 路径
 
-用生成的 `skill()` 引用替代脆弱的相对文件路径。
+编译后，`skill("/")` 以及每个嵌套 Skill/resource 路径都会进入编辑器提示。你不再需要手写脆弱的相对 `readFile(...)` 路径。
+
+![Skill 路径自动补全](assets/router-tip.png)
 
 ```ts
-const review = skill("/review");
-const rules = skill("/review/rules.md");
+import { skill } from "@review-skill/skill";
+
+const root = skill("/");
+const rules = skill("/react/rules/state.md");
 ```
 
-### 生成更省 token 的运行时内容
+### 3. Hover 查看 Skill 信息
 
-编译阶段会清理代码块外的 prompt 噪声，包括注释、装饰性格式、图片语法、多余空行和行尾空白。
+在任意生成的 `skill()` 调用上 hover，可以看到 Skill 标题、描述、源文件、文件数、字符数和 token 估算。
 
-### 适配任意 Agent 框架
+![Skill hover 摘要](assets/hover-tip-a.png)
 
-编译结果是标准 Markdown，可以接入 LangChain、Mastra、Vercel AI SDK、OpenAI SDK，或你自己的 Agent 运行时。
+hover 卡片还会展示编译后的运行时估算，包括常用、P95 和最大 token 预算。
 
-### 适合开发流程
+![Skill hover token 统计](assets/hover-tip-b.png)
 
-支持初始化 Skill 目录、单次编译，以及本地开发时监听文件变化。
+### 4. 输出更省 token 的 prompt 内容
 
-```bash
-npx review-skill --init
-npx review-skill
-npx review-skill --watch
-```
+`review-skill` 会清理代码块外的 prompt 噪声，包括注释、格式标记、图片语法、多余空行和行尾空白。代码示例会原样保留。
+
+### 5. 接入任意 Agent 技术栈
+
+编译后的资源就是普通 Markdown 字符串，可以作为 system prompt、developer instruction、工具规则、审查策略或 RAG 片段使用。
 
 ## 快速开始
 
 ### 1. 安装
 
 ```bash
-npm install review
+npm install review-skill
 ```
 
-### 2. 初始化 Skill
+### 2. 初始化
 
 ```bash
 npx review-skill --init
 ```
 
-它会创建初始的 `skills/SKILL.md`，并把 `.skill/` 加入 `.gitignore`。
+这会创建 `skills/SKILL.md`，把 `.skill/` 加入 `.gitignore`，生成 `skill.config.js` 或 `skill.config.mjs`，配置 `@review-skill/skill` TypeScript 路径别名，并在可能时添加常用 npm scripts。
 
 ### 3. 编写 Skill
 
 ```markdown
-# Code Review
+# React Code Review
 
-<!-- 内部备注：后续补充安全检查。 -->
+You are an expert React reviewer. Focus on correctness, state management,
+effects, rendering performance, and security-sensitive patterns.
 
-## State Management
-
-- Avoid derived state when it can be calculated during render.
-- Keep state close to the component or workflow that owns it.
-
-See `skill("/review/rules.md")` for detailed review rules.
+See `skill("/react/rules/state.md")` for state rules.
+See `skill("/react/rules/effects.md")` for effect rules.
 ```
 
 ### 4. 编译
@@ -92,11 +98,18 @@ See `skill("/review/rules.md")` for detailed review rules.
 npx review-skill
 ```
 
+也可以使用初始化时生成的 scripts：
+
+```bash
+npm run skill:build
+npm run skill:dev
+```
+
 示例输出：
 
 ```text
-Compiled 3 files in 45ms
-  2 skills | Source 1456 -> Runtime 1194 tokens | -18.0%
+Compiled 6 files in 91ms
+  3 skills | Source 2145 -> Runtime 1751 tokens | -18.4%
 ```
 
 ### 5. 使用生成的运行时
@@ -104,7 +117,10 @@ Compiled 3 files in 45ms
 ```ts
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
+const rules = skill("/react/rules/state.md");
+
+console.log(rules.meta.title);
+console.log(rules.meta.runtime.tokens);
 
 const markdown = await rules.read();
 ```
@@ -119,13 +135,12 @@ const markdown = await rules.read();
 import { ChatOpenAI } from "@langchain/openai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
-
+const rules = skill("/react/rules/state.md");
 const llm = new ChatOpenAI({ model: "gpt-4o" });
 
 const result = await llm.invoke([
   { role: "system", content: await rules.read() },
-  { role: "user", content: `Review this code:\n\`\`\`ts\n${userCode}\n\`\`\`` },
+  { role: "user", content: `Review this code:\n\`\`\`tsx\n${userCode}\n\`\`\`` },
 ]);
 ```
 
@@ -137,9 +152,8 @@ const result = await llm.invoke([
 import { Agent } from "@mastra/core";
 import { skill } from "@review-skill/skill";
 
-const review = skill("/review");
-const rules = skill("/review/rules.md");
-
+const review = skill("/react");
+const rules = skill("/react/rules/state.md");
 
 const agent = new Agent({
   name: review.meta.title,
@@ -156,7 +170,7 @@ const agent = new Agent({
 import { generateText } from "ai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
+const rules = skill("/react/rules/state.md");
 
 const { text } = await generateText({
   model: "openai/gpt-4o",
@@ -173,8 +187,7 @@ const { text } = await generateText({
 import OpenAI from "openai";
 import { skill } from "@review-skill/skill";
 
-const rules = skill("/review/rules.md");
-
+const rules = skill("/react/rules/state.md");
 const client = new OpenAI();
 
 const response = await client.responses.create({
@@ -188,15 +201,20 @@ const response = await client.responses.create({
 
 ### 自定义 Agent
 
-读取编译后的资源文件，再交给你自己的 prompt builder。
+读取编译后的资源文件，再把 Markdown 字符串交给你自己的 prompt builder。
 
 ```ts
 import { skill } from "@review-skill/skill";
 
-const guide = skill("/my-skill/guide.md");
+const guide = skill("/security/owasp.md");
 
 agent.setSystemPrompt(await guide.read());
 ```
+
+## 链接
+
+- [GitHub](https://github.com/qiao-coding/review-skill)
+- [npm](https://www.npmjs.com/package/review-skill)
 
 ## License
 
