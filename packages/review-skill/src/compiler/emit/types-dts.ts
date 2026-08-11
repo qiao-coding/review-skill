@@ -89,6 +89,7 @@ export async function emitTypesDts(
 
     lines.push(` *`);
     lines.push(` * > ${srcTitle} | ${srcChars} | ${srcTokens} |`);
+    lines.push(` *`);
     lines.push(` * > ${rtTitle} | ${rtChars} | ${rtTokens} |`);
     lines.push(" */");
     return lines.join("\n");
