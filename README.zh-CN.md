@@ -50,9 +50,9 @@ const rules = skill("/review/rules.md");
 支持初始化 Skill 目录、单次编译，以及本地开发时监听文件变化。
 
 ```bash
-npx review --init
-npx review
-npx review --watch
+npx review-skill --init
+npx review-skill
+npx review-skill --watch
 ```
 
 ## 快速开始
@@ -66,7 +66,7 @@ npm install review
 ### 2. 初始化 Skill
 
 ```bash
-npx review --init
+npx review-skill --init
 ```
 
 它会创建初始的 `skills/SKILL.md`，并把 `.skill/` 加入 `.gitignore`。
@@ -89,7 +89,7 @@ See `skill("/review/rules.md")` for detailed review rules.
 ### 4. 编译
 
 ```bash
-npx review
+npx review-skill
 ```
 
 示例输出：

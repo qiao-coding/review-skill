@@ -57,9 +57,9 @@ Initialize a skill directory, compile skills once, or watch files during local
 development.
 
 ```bash
-npx review --init
-npx review
-npx review --watch
+npx review-skill --init
+npx review-skill
+npx review-skill --watch
 ```
 
 ## Quick start
@@ -73,7 +73,7 @@ npm install review
 ### 2. Initialize skills
 
 ```bash
-npx review --init
+npx review-skill --init
 ```
 
 This creates an initial `skills/SKILL.md` and adds `.skill/` to `.gitignore`.
@@ -96,7 +96,7 @@ See `skill("/review/rules.md")` for detailed review rules.
 ### 4. Compile
 
 ```bash
-npx review
+npx review-skill
 ```
 
 Example output:

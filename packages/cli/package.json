@@ -1,9 +1,9 @@
 {
-  "name": "review",
+  "name": "review-skill",
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "review": "./bin/cli.js"
+    "review-skill": "./bin/cli.js"
   },
   "files": ["dist", "bin"],
   "publishConfig": {
@@ -13,7 +13,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@review/compiler": "0.1.0"
+    "@qiao-coding/skill-compiler": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

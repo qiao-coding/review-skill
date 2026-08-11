@@ -5,7 +5,7 @@ import { analyze } from "./analyze.js";
 import { transformMarkdown } from "./transform.js";
 import { estimateTokens } from "./tokenize.js";
 import { emitRuntime, emitMetadata, emitTypesDts } from "./emit/index.js";
-import type { SkillMeta, StripOptions } from "@review/core";
+import type { SkillMeta, StripOptions } from "@qiao-coding/skill-core";
 
 export interface CompileResult {
   entries: SkillMeta[];

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * review — single-bin CLI, no heavy framework.
+ * review-skill — single-bin CLI, no heavy framework.
  */
 
-import { compile } from "@review/compiler";
+import { compile } from "@qiao-coding/skill-compiler";
 import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import { join, resolve } from "node:path";
@@ -61,7 +61,7 @@ if (isInit) {
   const configPath = join(cwd, "skill.config.js");
   if (!existsSync(configPath)) {
     await writeFile(configPath, [
-      'import { defineConfig } from "@review/core";',
+      'import { defineConfig } from "@qiao-coding/skill-core";',
       "",
       "export default defineConfig({",
       '  /** Directory containing your skill markdown files */',
@@ -90,18 +90,39 @@ if (isInit) {
 
   const gitignorePath = join(cwd, ".gitignore");
   const line = ".skill/";
-  let content = "";
+  let gitContent = "";
   if (existsSync(gitignorePath)) {
-    content = await readFile(gitignorePath, "utf-8");
+    gitContent = await readFile(gitignorePath, "utf-8");
   }
-  if (!content.includes(line)) {
-    await appendFile(gitignorePath, (content ? "\n" : "") + line + "\n", "utf-8");
+  if (!gitContent.includes(line)) {
+    await appendFile(gitignorePath, (gitContent ? "\n" : "") + line + "\n", "utf-8");
     console.log(`✔ ${msg("initGitignore")}`);
+  }
+
+  // Inject scripts into package.json
+  const pkgPath = join(cwd, "package.json");
+  if (existsSync(pkgPath)) {
+    const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
+    if (!pkg.scripts) pkg.scripts = {};
+    let updated = false;
+    if (!pkg.scripts["skill:build"]) {
+      pkg.scripts["skill:build"] = "review-skill";
+      updated = true;
+    }
+    if (!pkg.scripts["skill:dev"]) {
+      pkg.scripts["skill:dev"] = "review-skill --watch";
+      updated = true;
+    }
+    if (updated) {
+      await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+      console.log(`✔ ${msg("initScripts")}`);
+    }
   }
 
   console.log("");
   console.log(msg("initDone1"));
-  console.log(msg("initDone2"));
+  console.log(`  ${msg("initDone2")}`);
+  console.log(`  ${msg("initDone3")}`);
   process.exit(0);
 }
 

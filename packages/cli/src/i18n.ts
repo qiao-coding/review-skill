@@ -2,11 +2,11 @@
 
 const messages = {
   en: {
-    help: `review — Compile Markdown Agent Skills
+    help: `review-skill — Compile Markdown Agent Skills
 
-  npx review              Build skills for production
-  npx review --init       Initialize skills/ in current project
-  npx review --watch      Build and watch for changes
+  npx review-skill Build skills for production
+  npx review-skill --init       Initialize skills/ in current project
+  npx review-skill --watch      Build and watch for changes
 
 Config: skill.config.js (optional)
 `,
@@ -15,22 +15,24 @@ Config: skill.config.js (optional)
     initCreateConfig: "Create skill.config.js",
     initConfigExists: "skill.config.js already exists",
     initGitignore: "Add .skill/ to .gitignore",
-    initDone1: 'Done. Try typing:  skill("/")',
-    initDone2: "  then run:        npx review",
+    initDone1: "Done. Try these commands:",
+    initDone2: "  npm run skill:build      (compile once)",
+    initDone3: "  npm run skill:dev        (watch mode)",
+    initScripts: "Add scripts to package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `Compiled ${files} files in ${ms}ms\n  ${skills} skills  |  Source ${src} → Runtime ${rt} tokens  |  -${rate}%\n`,
     watchStart: (dir: string) => `Watching ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] Rebuilding...`,
     errorSkillNotFound: (path: string) =>
-      `Skill not found: "${path}". Run "npx review" to compile.`,
+      `Skill not found: "${path}". Run "npx review-skill" to compile.`,
   },
 
   "zh-CN": {
-    help: `review — Markdown Agent Skill 编译器
+    help: `review-skill — Markdown Agent Skill 编译器
 
-  npx review              构建 skills → .skill/
-  npx review --init       初始化 skills/ 目录
-  npx review --watch      构建并监听文件变更
+  npx review-skill构建 skills → .skill/
+  npx review-skill --init       初始化 skills/ 目录
+  npx review-skill --watch      构建并监听文件变更
 
 配置文件: skill.config.js（可选）
 `,
@@ -39,14 +41,16 @@ Config: skill.config.js (optional)
     initCreateConfig: "创建 skill.config.js",
     initConfigExists: "skill.config.js 已存在",
     initGitignore: ".gitignore 中加入 .skill/",
-    initDone1: '完成。试试输入:  skill("/")',
-    initDone2: "  然后运行:        npx review",
+    initDone1: "完成。试试以下命令：",
+    initDone2: "  npm run skill:build      (编译)",
+    initDone3: "  npm run skill:dev        (监听模式)",
+    initScripts: "添加 scripts 到 package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill  |  源文件 ${src} → 运行时 ${rt} tokens  |  -${rate}%\n`,
     watchStart: (dir: string) => `正在监听 ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] 重新编译中...`,
     errorSkillNotFound: (path: string) =>
-      `找不到 Skill: "${path}"。请运行 "npx review" 编译。`,
+      `找不到 Skill: "${path}"。请运行 "npx review-skill" 编译。`,
   },
 };
 

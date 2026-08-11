@@ -3,14 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "skill:build": "review build",
-    "skill:dev": "review dev"
+    "skill:build": "review-skill build",
+    "skill:dev": "review-skill dev"
   },
   "dependencies": {
-    "@review/core": "file:../packages/core"
+    "@qiao-coding/skill-core": "file:../packages/core"
   },
   "devDependencies": {
-    "review": "file:../packages/cli",
+    "review-skill": "file:../packages/cli",
     "typescript": "^5.7.0",
     "@types/node": "^22.0.0"
   }
