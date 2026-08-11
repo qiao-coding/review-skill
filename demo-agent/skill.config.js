@@ -1,15 +1,33 @@
 import { defineConfig } from "review-skill";
 
 export default defineConfig({
+  /** Directory containing your skill markdown files */
   skillsDir: "skills",
+
+  /** Output directory for compiled artifacts */
   outputDir: ".skill",
+
+  /** Markdown elements to strip during compilation (all default to true) */
   strip: {
-    comment: true,        // <!-- HTML 注释 -->
-    formatting: true,     // **加粗** *斜体* ~~删除线~~
-    image: true,          // ![图片](url)
-    blockquote: true,     // > 引用
-    thematicBreak: true,  // --- 分割线
-    bullet: true,         // * - + 列表符
-    whitespace: true,     // 多余空行、行尾空格
+    /** <!-- HTML comments --> */
+    comment: true,
+
+    /** **bold** *italic* ~~strikethrough~~ */
+    formatting: true,
+
+    /** ![images](url) */
+    image: true,
+
+    /** > blockquotes */
+    blockquote: true,
+
+    /** --- horizontal rules */
+    thematicBreak: true,
+
+    /** * - + list bullet markers */
+    bullet: true,
+
+    /** extra blank lines and trailing whitespace */
+    whitespace: true,
   },
 });
