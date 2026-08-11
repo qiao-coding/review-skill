@@ -109,7 +109,7 @@ Compiled 3 files in 45ms
 ### 5. Use the generated runtime
 
 ```ts
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const rules = skill("/review/rules.md");
 
@@ -124,7 +124,7 @@ Use a compiled skill resource as the system message.
 
 ```ts
 import { ChatOpenAI } from "@langchain/openai";
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const rules = skill("/review/rules.md");
 
@@ -142,7 +142,7 @@ Use compiled Markdown as agent instructions.
 
 ```ts
 import { Agent } from "@mastra/core";
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const review = skill("/review");
 const rules = skill("/review/rules.md");
@@ -161,7 +161,7 @@ Pass compiled Markdown into `system`.
 
 ```ts
 import { generateText } from "ai";
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const rules = skill("/review/rules.md");
 
@@ -178,7 +178,7 @@ Use compiled Markdown as the developer instruction.
 
 ```ts
 import OpenAI from "openai";
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const rules = skill("/review/rules.md");
 
@@ -198,7 +198,7 @@ const response = await client.responses.create({
 Read a compiled resource and pass the string to your own prompt builder.
 
 ```ts
-import { skill } from "../.skill/skill";
+import { skill } from "../.skill/skill.js";
 
 const guide = skill("/my-skill/guide.md");
 
