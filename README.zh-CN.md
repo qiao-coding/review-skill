@@ -1,6 +1,6 @@
 # review-skill
 
-把 Markdown 编写的 Agent Skill 编译成类型安全、可统计 token、可直接运行的产物。
+TypeScript Agent Skill 编译器 — 类型安全引用、Token 统计、零 IDE 插件。
 
 ![review-skill 项目概览](assets/review-skill-overview.png)
 

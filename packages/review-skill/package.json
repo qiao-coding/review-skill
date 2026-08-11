@@ -1,7 +1,7 @@
 {
   "name": "review-skill",
   "version": "0.1.9",
-  "description": "Compile Markdown Agent Skills into type-safe, token-aware runtime artifacts",
+  "description": "TypeScript compiler for Markdown Agent Skills — typed references, token stats, zero plugins",
   "type": "module",
   "bin": {
     "review-skill": "./bin/cli.js"

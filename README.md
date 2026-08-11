@@ -1,6 +1,6 @@
 # review-skill
 
-Compile Markdown Agent Skills into type-safe, token-aware runtime artifacts.
+A TypeScript-first compiler for Markdown Agent Skills — type-safe references, token-aware runtime, zero IDE plugins.
 
 ![review-skill overview](assets/review-skill-overview.png)
 
