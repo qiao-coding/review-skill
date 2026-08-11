@@ -80,15 +80,16 @@ export async function emitTypesDts(
     const cs = rc < sc ? `-${cpct}` : `+${cpct}`;
     const ts = rt < sr ? `-${tpct}` : `+${tpct}`;
 
+    const srcTitle = L.sourceTitle.replace(/^── /, "").replace(/ ──$/, "");
+    const rtTitle = L.runtimeTitle.replace(/^── /, "").replace(/ ──$/, "");
     const srcChars = `${L.characters} ${sc.toLocaleString()}`;
     const srcTokens = `${L.tokens} ~${sr.toLocaleString()}`;
     const rtChars = `${L.characters} ${rc.toLocaleString()} (${cs}%)`;
     const rtTokens = `${L.tokens} ~${rt.toLocaleString()} (${ts}%)`;
 
     lines.push(` *`);
-    lines.push(` * > ${L.sourceTitle} | ${srcChars} | ${srcTokens}`);
-    lines.push(` *`);
-    lines.push(` * > ${L.runtimeTitle} | ${rtChars} | ${rtTokens}`);
+    lines.push(` * > ${srcTitle} | ${srcChars} | ${srcTokens} |`);
+    lines.push(` * > ${rtTitle} | ${rtChars} | ${rtTokens} |`);
     lines.push(" */");
     return lines.join("\n");
   }
