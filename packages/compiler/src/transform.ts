@@ -230,7 +230,7 @@ export function cleanWhitespace(content: string): string {
 
 // ── Full pipeline ────────────────────────────────────────────
 
-import type { StripOptions } from "@review-skill/core";
+import type { StripOptions } from "@review/core";
 
 export async function transformMarkdown(
   sourceContent: string,

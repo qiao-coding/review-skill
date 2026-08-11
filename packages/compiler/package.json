@@ -1,5 +1,5 @@
 {
-  "name": "@review-skill/compiler",
+  "name": "@review/compiler",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,6 +19,7 @@
     "clean": "tsc --build --clean"
   },
   "dependencies": {
+    "@review/core": "*",
     "fast-glob": "^3.3.3",
     "unified": "^11.0.5",
     "remark-parse": "^11.0.0",

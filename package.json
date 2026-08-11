@@ -1,5 +1,5 @@
 {
-  "name": "review-skill-monorepo",
+  "name": "review-monorepo",
   "private": true,
   "workspaces": [
     "packages/*"

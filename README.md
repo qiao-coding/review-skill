@@ -1,8 +1,8 @@
-# review-skill
+# review
 
 Turn Markdown Agent Skills into type-safe, token-aware runtime artifacts.
 
-![review-skill overview](assets/review-skill-overview.png)
+![review overview](assets/review-overview.png)
 
 Language: English | [简体中文](README.zh-CN.md)
 
@@ -12,7 +12,7 @@ Language: English | [简体中文](README.zh-CN.md)
 - [Quick start](#quick-start)
 - [Agent framework integrations](#agent-framework-integrations)
 
-`review-skill` helps developers manage agent instructions like application
+`review` helps developers manage agent instructions like application
 assets. You write reusable skills in Markdown, compile them into optimized
 runtime files, and consume them through a generated TypeScript API.
 
@@ -57,9 +57,9 @@ Initialize a skill directory, compile skills once, or watch files during local
 development.
 
 ```bash
-npx review-skill --init
-npx review-skill
-npx review-skill --watch
+npx review --init
+npx review
+npx review --watch
 ```
 
 ## Quick start
@@ -67,13 +67,13 @@ npx review-skill --watch
 ### 1. Install
 
 ```bash
-npm install review-skill
+npm install review
 ```
 
 ### 2. Initialize skills
 
 ```bash
-npx review-skill --init
+npx review --init
 ```
 
 This creates an initial `skills/SKILL.md` and adds `.skill/` to `.gitignore`.
@@ -96,7 +96,7 @@ See `skill("/review/rules.md")` for detailed review rules.
 ### 4. Compile
 
 ```bash
-npx review-skill
+npx review
 ```
 
 Example output:

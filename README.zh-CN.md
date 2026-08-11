@@ -1,8 +1,8 @@
-# review-skill
+# review
 
 把 Markdown 编写的 Agent Skill 编译成类型安全、可统计 token、可直接运行的产物。
 
-![review-skill 项目概览](assets/review-skill-overview.png)
+![review 项目概览](assets/review-overview.png)
 
 语言：[English](README.md) | 简体中文
 
@@ -12,7 +12,7 @@
 - [快速开始](#快速开始)
 - [不同 Agent 框架如何接入](#不同-agent-框架如何接入)
 
-`review-skill` 帮开发者把 Agent 指令当成真正的工程资产来管理。你可以用 Markdown 编写可复用 Skill，把它们编译成更适合运行时使用的文件，然后通过生成的 TypeScript API 在 Agent 应用里安全引用。
+`review` 帮开发者把 Agent 指令当成真正的工程资产来管理。你可以用 Markdown 编写可复用 Skill，把它们编译成更适合运行时使用的文件，然后通过生成的 TypeScript API 在 Agent 应用里安全引用。
 
 ## 功能介绍
 
@@ -50,9 +50,9 @@ const rules = skill("/review/rules.md");
 支持初始化 Skill 目录、单次编译，以及本地开发时监听文件变化。
 
 ```bash
-npx review-skill --init
-npx review-skill
-npx review-skill --watch
+npx review --init
+npx review
+npx review --watch
 ```
 
 ## 快速开始
@@ -60,13 +60,13 @@ npx review-skill --watch
 ### 1. 安装
 
 ```bash
-npm install review-skill
+npm install review
 ```
 
 ### 2. 初始化 Skill
 
 ```bash
-npx review-skill --init
+npx review --init
 ```
 
 它会创建初始的 `skills/SKILL.md`，并把 `.skill/` 加入 `.gitignore`。
@@ -89,7 +89,7 @@ See `skill("/review/rules.md")` for detailed review rules.
 ### 4. 编译
 
 ```bash
-npx review-skill
+npx review
 ```
 
 示例输出：

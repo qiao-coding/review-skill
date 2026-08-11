@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * review-skill — single-bin CLI, no heavy framework.
+ * review — single-bin CLI, no heavy framework.
  */
 
-import { compile } from "@review-skill/compiler";
+import { compile } from "@review/compiler";
 import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import { join, resolve } from "node:path";
@@ -61,7 +61,7 @@ if (isInit) {
   const configPath = join(cwd, "skill.config.js");
   if (!existsSync(configPath)) {
     await writeFile(configPath, [
-      'import { defineConfig } from "@review-skill/core";',
+      'import { defineConfig } from "@review/core";',
       "",
       "export default defineConfig({",
       '  /** Directory containing your skill markdown files */',
