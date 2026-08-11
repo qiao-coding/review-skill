@@ -60,11 +60,11 @@ hover 卡片还会展示编译后的运行时估算，包括常用、P95 和最�
 
 `review-skill` 会清理代码块外的 prompt 噪声，包括注释、格式标记、图片语法、多余空行和行尾空白。代码示例会原样保留。
 
-开发时，你可以保留注释、格式、表格和内部说明，让 Skill 更适合人阅读和维护：
+开发时为了结合业务，我们写 Markdown 时会尽量声明意图以适合开发者和cc，codex去阅读，所以它需要有注释、格式、空行、表格和内部说明。
 
 ![编译前的 Skill 源文件](assets/dev-skill.png)
 
-编译后，运行时 Markdown 会变得更干净，也更省 token：
+对人类有帮助的格式和说明，并不一定都需要进入模型运行时。HTML 注释、图片引用、装饰性 Markdown 标记和多余空白会增加输入字符，并可能引入与任务无关的结构信息。review-skill 因此将开发态 Markdown 和运行态 Markdown 分离，只保留执行所需内容。
 
 ![编译后的 Skill 运行时内容](assets/build-skill.png)
 
@@ -218,6 +218,30 @@ const guide = skill("/security/owasp.md");
 
 agent.setSystemPrompt(guide.content);
 ```
+
+## 配置
+
+`skill.config.js` 控制编译时清除哪些元素：
+
+```js
+import { defineConfig } from "review-skill";
+
+export default defineConfig({
+  skillsDir: "skills",
+  outputDir: ".skill",
+  strip: {
+    comment: true,        // <!-- HTML 注释 -->
+    formatting: true,     // **加粗** *斜体* ~~删除线~~
+    image: true,          // ![图片](url)
+    blockquote: true,     // > 引用
+    thematicBreak: true,  // --- 分割线
+    bullet: true,         // * - + 列表符
+    whitespace: true,     // 多余空行、行尾空格
+  },
+});
+```
+
+想保留哪个格式，把对应项设为 `false` 即可。
 
 ## 链接
 

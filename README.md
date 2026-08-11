@@ -233,6 +233,30 @@ const guide = skill("/security/owasp.md");
 agent.setSystemPrompt(guide.content);
 ```
 
+## Configuration
+
+`skill.config.js` controls what gets stripped during compilation:
+
+```js
+import { defineConfig } from "review-skill";
+
+export default defineConfig({
+  skillsDir: "skills",
+  outputDir: ".skill",
+  strip: {
+    comment: true,        // <!-- HTML comments -->
+    formatting: true,     // **bold** *italic* ~~strike~~
+    image: true,          // ![alt](url)
+    blockquote: true,     // > quotes
+    thematicBreak: true,  // --- horizontal rules
+    bullet: true,         // * - + list markers
+    whitespace: true,     // blank lines, trailing spaces
+  },
+});
+```
+
+Set any option to `false` to keep that element in the runtime output.
+
 ## Links
 
 - [GitHub](https://github.com/qiao-coding/review-skill)
