@@ -60,6 +60,14 @@ hover 卡片还会展示编译后的运行时估算，包括常用、P95 和最�
 
 `review-skill` 会清理代码块外的 prompt 噪声，包括注释、格式标记、图片语法、多余空行和行尾空白。代码示例会原样保留。
 
+开发时，你可以保留注释、格式、表格和内部说明，让 Skill 更适合人阅读和维护：
+
+![编译前的 Skill 源文件](assets/dev-skill.png)
+
+编译后，运行时 Markdown 会变得更干净，也更省 token：
+
+![编译后的 Skill 运行时内容](assets/build-skill.png)
+
 ### 5. 接入任意 Agent 技术栈
 
 编译后的资源就是普通 Markdown 字符串，可以作为 system prompt、developer instruction、工具规则、审查策略或 RAG 片段使用。

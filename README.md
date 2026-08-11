@@ -69,6 +69,16 @@ and maximum token budgets for the skill.
 formatting markers, image syntax, extra blank lines, and trailing whitespace.
 Code examples stay intact.
 
+During development, keep your skill files readable with comments, formatting,
+tables, and internal notes:
+
+![source skill before compilation](assets/dev-skill.png)
+
+After compilation, the runtime Markdown is cleaner and cheaper to send to the
+model:
+
+![compiled skill after optimization](assets/build-skill.png)
+
 ### 5. Use the output in any agent stack
 
 Compiled resources are plain Markdown strings, so they can be used as system
