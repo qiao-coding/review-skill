@@ -2,25 +2,19 @@
  * Demo AI Code Review Agent
  *
  * Hover any skill("/...") call to see token stats in your IDE.
+ * All types come from .skill/types.d.ts via module augmentation.
  */
 
-import { skill, type SkillRef } from "../.skill/skill.js";
+import { skill } from "review-skill";
 
-interface ReviewRequest {
-  files: Array<{ path: string; content: string }>;
-  author: string;
-}
+async function reviewCode(req: { files: Array<{ path: string; content: string }> }) {
+  const rootSkill      = skill("/");
+  const reactSkill     = skill("/react");
+  const securitySkill  = skill("/security");
+  const stateRules     = skill("/react/rules/state.md");
+  const effectRules    = skill("/react/rules/effects.md");
+  const owaspRef       = skill("/security/owasp.md");
 
-async function reviewCode(req: ReviewRequest) {
-  // Each path is type-checked — try typing skill("/ in your IDE
-  const rootSkill   = skill("/");
-  const reactSkill  = skill("/react");
-  const securitySkill = skill("/security");
-  const stateRules  = skill("/react/rules/state.md");
-  const effectRules = skill("/react/rules/effects.md");
-  const owaspRef    = skill("/security/owasp.md");
-
-  // One unified API: .meta for stats, .read() for markdown
   const skills = [rootSkill, reactSkill, securitySkill, stateRules, effectRules, owaspRef];
 
   console.log("=== Agent Context Loaded ===");
@@ -31,7 +25,6 @@ async function reviewCode(req: ReviewRequest) {
   const total = skills.reduce((sum, s) => sum + s.meta.runtime.tokens, 0);
   console.log(`\nTotal context: ~${total} tokens\n`);
 
-  // Quick scan for issues matching our skill rules
   const issues: string[] = [];
   for (const file of req.files) {
     if (/dangerouslySetInnerHTML/.test(file.content)) {
@@ -42,34 +35,21 @@ async function reviewCode(req: ReviewRequest) {
     }
   }
 
-  return { total, issues };
+  return issues;
 }
-
-// ── Run ──
 
 const result = await reviewCode({
   files: [
     {
       path: "src/components/Profile.tsx",
-      content: `
-function Profile({ user }) {
-  const [name, setName] = useState(user.first + " " + user.last);
-  return <div dangerouslySetInnerHTML={{ __html: user.bio }} />;
-}`,
+      content: `<div dangerouslySetInnerHTML={{ __html: user.bio }} />`,
     },
     {
       path: "src/api/users.ts",
-      content: `
-async function getUser(id: string) {
-  const query = \`SELECT * FROM users WHERE id = \${id}\`;
-  return db.query(query);
-}`,
+      content: "const query = `SELECT * FROM users WHERE id = ${id}`;",
     },
   ],
-  author: "demo-user",
 });
 
-console.log(`=== Found ${result.issues.length} issue(s) ===\n`);
-for (const issue of result.issues) {
-  console.log(issue);
-}
+console.log(`=== Found ${result.length} issue(s) ===\n`);
+for (const issue of result) { console.log(issue); }
