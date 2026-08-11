@@ -207,4 +207,11 @@ agent.setSystemPrompt(await guide.read());
 
 ## License
 
+## Links
+
+- [GitHub](https://github.com/qiao-coding/review-skill)
+- [npm](https://www.npmjs.com/package/review-skill)
+
+## License
+
 MIT

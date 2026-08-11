@@ -1,7 +1,11 @@
 {
-  "name": "@qiao-coding/skill-compiler",
+  "name": "review-skill",
   "version": "0.1.0",
+  "description": "Compile Markdown Agent Skills into type-safe, token-aware runtime artifacts",
   "type": "module",
+  "bin": {
+    "review-skill": "./bin/cli.js"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -10,26 +14,28 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "bin"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsc",
-    "clean": "tsc --build --clean"
+    "prepublishOnly": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qiao-coding/review-skill"
+  },
+  "homepage": "https://github.com/qiao-coding/review-skill#readme",
   "dependencies": {
-    "@qiao-coding/skill-core": "*",
     "fast-glob": "^3.3.3",
     "unified": "^11.0.5",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "mdast-util-to-string": "^4.0.0",
-    "unist-util-visit": "^5.0.0",
-    "@types/mdast": "^4.0.4"
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@types/unist": "^3.0.3",
     "@types/mdast": "^4.0.4",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"

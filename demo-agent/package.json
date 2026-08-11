@@ -3,15 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "skill:build": "review-skill build",
-    "skill:dev": "review-skill dev"
+    "skill:build": "review-skill",
+    "skill:dev": "review-skill --watch"
   },
   "dependencies": {
-    "@qiao-coding/skill-core": "file:../packages/core"
+    "review-skill": "file:../packages/review-skill"
   },
   "devDependencies": {
-    "review-skill": "file:../packages/cli",
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "review-skill": "file:../packages/review-skill",
+    "typescript": "^5.7.0"
   }
 }

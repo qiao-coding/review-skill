@@ -1,4 +1,4 @@
-// @qiao-coding/skill-compiler — public API
+// ../compiler/pipeline.js — public API
 export { compile } from "./pipeline.js";
 export type { CompileResult } from "./pipeline.js";
 export { discover } from "./discover.js";

@@ -1,6 +1,6 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { SkillMeta } from "@qiao-coding/skill-core";
+import type { SkillMeta } from "../../types.js";
 
 const LABELS: Record<string, Record<string, string>> = {
   en: {
@@ -109,8 +109,8 @@ export async function emitTypesDts(
     "",
     "/* eslint-disable */",
     "",
-    'import { resolveSkill, loadMetadata } from "@qiao-coding/skill-core";',
-    'import type { SkillRef, SkillMeta, SkillStats } from "@qiao-coding/skill-core";',
+    'import { resolveSkill, loadMetadata } from "review-skill";',
+    'import type { SkillRef, SkillMeta, SkillStats } from "review-skill";',
     'export type { SkillRef, SkillMeta, SkillStats };',
     "",
     "// Metadata loaded once at import time — skill() is synchronous.",

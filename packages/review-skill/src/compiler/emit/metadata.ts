@@ -1,6 +1,6 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { SkillMeta } from "@qiao-coding/skill-core";
+import type { SkillMeta } from "../../types.js";
 
 export async function emitMetadata(
   entries: SkillMeta[],

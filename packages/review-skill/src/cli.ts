@@ -3,7 +3,7 @@
  * review-skill — single-bin CLI, no heavy framework.
  */
 
-import { compile } from "@qiao-coding/skill-compiler";
+import { compile } from "./compiler/pipeline.js";
 import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import { join, resolve } from "node:path";
@@ -61,7 +61,7 @@ if (isInit) {
   const configPath = join(cwd, "skill.config.js");
   if (!existsSync(configPath)) {
     await writeFile(configPath, [
-      'import { defineConfig } from "@qiao-coding/skill-core";',
+      'import { defineConfig } from "review-skill";',
       "",
       "export default defineConfig({",
       '  /** Directory containing your skill markdown files */',
