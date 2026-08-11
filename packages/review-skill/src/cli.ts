@@ -113,6 +113,24 @@ if (isInit) {
     console.log(`✔ ${msg("initGitignore")}`);
   }
 
+  // Inject tsconfig path alias
+  const tsconfigPath = join(cwd, "tsconfig.json");
+  let tsc: any;
+  if (existsSync(tsconfigPath)) {
+    tsc = JSON.parse(await readFile(tsconfigPath, "utf-8"));
+  } else {
+    tsc = { compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, baseUrl: "." }, include: ["src", ".skill"] };
+  }
+  if (!tsc.compilerOptions) tsc.compilerOptions = {};
+  if (!tsc.compilerOptions.baseUrl) tsc.compilerOptions.baseUrl = ".";
+  if (!tsc.compilerOptions.paths) tsc.compilerOptions.paths = {};
+  if (!tsc.include) tsc.include = ["src", ".skill"];
+  if (!tsc.compilerOptions.paths["@skill"]) {
+    tsc.compilerOptions.paths["@skill"] = [".skill/skill.ts"];
+    await writeFile(tsconfigPath, JSON.stringify(tsc, null, 2) + "\n", "utf-8");
+    console.log(`✔ ${msg("initTsconfig")}`);
+  }
+
   // Inject scripts + ensure ESM
   if (existsSync(pkgPath)) {
     const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));

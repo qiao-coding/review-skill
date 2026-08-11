@@ -102,7 +102,7 @@ Compiled 3 files in 45ms
 ### 5. 使用生成的运行时
 
 ```ts
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const rules = skill("/review/rules.md");
 
@@ -117,7 +117,7 @@ const markdown = await rules.read();
 
 ```ts
 import { ChatOpenAI } from "@langchain/openai";
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const rules = skill("/review/rules.md");
 
@@ -135,7 +135,7 @@ const result = await llm.invoke([
 
 ```ts
 import { Agent } from "@mastra/core";
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const review = skill("/review");
 const rules = skill("/review/rules.md");
@@ -154,7 +154,7 @@ const agent = new Agent({
 
 ```ts
 import { generateText } from "ai";
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const rules = skill("/review/rules.md");
 
@@ -171,7 +171,7 @@ const { text } = await generateText({
 
 ```ts
 import OpenAI from "openai";
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const rules = skill("/review/rules.md");
 
@@ -191,7 +191,7 @@ const response = await client.responses.create({
 读取编译后的资源文件，再交给你自己的 prompt builder。
 
 ```ts
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const guide = skill("/my-skill/guide.md");
 

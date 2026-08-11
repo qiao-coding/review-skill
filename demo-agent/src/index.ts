@@ -1,4 +1,4 @@
-import { skill } from "../.skill/skill.js";
+import { skill } from "@skill";
 
 const root = skill("/");
 const rules = skill("/react/rules/state.md");

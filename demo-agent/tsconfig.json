@@ -4,6 +4,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
+    "baseUrl": ".",
+    "paths": { "@skill": [".skill/skill.ts"] },
     "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "."
