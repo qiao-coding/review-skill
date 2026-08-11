@@ -84,7 +84,8 @@ export async function emitTypesDts(
     const rtTitle = L.runtimeTitle.replace(/^── /, "").replace(/ ──$/, "");
 
     lines.push(` *`);
-    lines.push(` * **${srcTitle}** | ${L.characters} ${sc.toLocaleString()} | ${L.tokens} ~${sr.toLocaleString()}`);
+    lines.push(` * **${srcTitle}** | ${L.characters} ${sc.toLocaleString()} | ${L.tokens} ~${sr.toLocaleString()}  `);
+    lines.push(` *`);
     lines.push(` * **${rtTitle}** | ${L.characters} ${rc.toLocaleString()} (${cs}%) | ${L.tokens} ~${rt.toLocaleString()} (${ts}%)`);
     lines.push(" */");
     return lines.join("\n");
