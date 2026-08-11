@@ -144,7 +144,7 @@ const rules = skill("/react/rules/state.md");
 console.log(rules.meta.title);
 console.log(rules.meta.runtime.tokens);
 
-const markdown = await rules.read();
+const markdown = rules.content;
 ```
 
 ## Agent framework integrations
@@ -161,7 +161,7 @@ const rules = skill("/react/rules/state.md");
 const llm = new ChatOpenAI({ model: "gpt-4o" });
 
 const result = await llm.invoke([
-  { role: "system", content: await rules.read() },
+  { role: "system", content: rules.content },
   { role: "user", content: `Review this code:\n\`\`\`tsx\n${userCode}\n\`\`\`` },
 ]);
 ```
@@ -179,7 +179,7 @@ const rules = skill("/react/rules/state.md");
 
 const agent = new Agent({
   name: review.meta.title,
-  instructions: await rules.read(),
+  instructions: rules.content,
   model: "openai/gpt-4o",
 });
 ```
@@ -196,7 +196,7 @@ const rules = skill("/react/rules/state.md");
 
 const { text } = await generateText({
   model: "openai/gpt-4o",
-  system: await rules.read(),
+  system: rules.content,
   prompt: `Review this code:\n${code}`,
 });
 ```
@@ -215,7 +215,7 @@ const client = new OpenAI();
 const response = await client.responses.create({
   model: "gpt-4.1",
   input: [
-    { role: "developer", content: await rules.read() },
+    { role: "developer", content: rules.content },
     { role: "user", content: `Review this code:\n${code}` },
   ],
 });
@@ -230,7 +230,7 @@ import { skill } from "@review-skill/skill";
 
 const guide = skill("/security/owasp.md");
 
-agent.setSystemPrompt(await guide.read());
+agent.setSystemPrompt(guide.content);
 ```
 
 ## Links

@@ -44,6 +44,8 @@ export interface StripOptions {
 
 export interface SkillRef {
   readonly meta: SkillMeta;
-  /** Read the compiled runtime markdown. */
+  /** Compiled runtime markdown — sync, no I/O. */
+  readonly content: string;
+  /** @deprecated Use .content instead. */
   read(): Promise<string>;
 }

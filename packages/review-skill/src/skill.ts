@@ -1,6 +1,5 @@
 import type { SkillRef, SkillMeta } from "./types.js";
 import { readFileSync, existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export function defineConfig<T extends Record<string, unknown>>(config: T): T {
@@ -24,18 +23,20 @@ function readRuntimePath(baseDir: string, path: string, isSkill: boolean): strin
     : join(baseDir, "runtime", path.replace(/^\//, ""));
 }
 
-/** Create a SkillRef from metadata. Synchronous — metadata must be pre-loaded. */
+/** Create a SkillRef from metadata. Reads compiled content synchronously. */
 export function createSkill(
   path: string,
   meta: SkillMeta,
   baseDir: string
 ): SkillRef {
   const filePath = readRuntimePath(baseDir, path, meta.isSkill);
+  const content = readFileSync(filePath, "utf-8");
 
   return {
     meta,
+    content,
     async read(): Promise<string> {
-      return readFile(filePath, "utf-8");
+      return content;
     },
   };
 }
