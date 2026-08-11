@@ -82,15 +82,14 @@ export async function emitTypesDts(
 
     const srcTitle = L.sourceTitle.replace(/^── /, "").replace(/ ──$/, "");
     const rtTitle = L.runtimeTitle.replace(/^── /, "").replace(/ ──$/, "");
-    const srcChars = `${L.characters} ${sc.toLocaleString()}`;
-    const srcTokens = `${L.tokens} ~${sr.toLocaleString()}`;
-    const rtChars = `${L.characters} ${rc.toLocaleString()} (${cs}%)`;
-    const rtTokens = `${L.tokens} ~${rt.toLocaleString()} (${ts}%)`;
+    const srcCol = `${pad(srcTitle, labelW - 2)} ${L.characters} ${pad(sc.toLocaleString(), 6)} ${L.tokens} ~${sr.toLocaleString()}`;
+    const rtCol = `${pad(rtTitle, labelW - 2)} ${L.characters} ${pad(rc.toLocaleString(), 6)} (${cs}%)  ${L.tokens} ~${rt.toLocaleString()} (${ts}%)`;
 
     lines.push(` *`);
-    lines.push(` * > ${srcTitle} | ${srcChars} | ${srcTokens} |`);
-    lines.push(` *`);
-    lines.push(` * > ${rtTitle} | ${rtChars} | ${rtTokens} |`);
+    lines.push(` * \`\`\``);
+    lines.push(` * ${srcCol}`);
+    lines.push(` * ${rtCol}`);
+    lines.push(` * \`\`\``);
     lines.push(" */");
     return lines.join("\n");
   }
