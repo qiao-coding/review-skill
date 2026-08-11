@@ -1,0 +1,52 @@
+export type SkillPath = string;
+export type ResourcePath = string;
+export type SkillAddress = SkillPath | ResourcePath;
+
+export interface SkillStats {
+  characters: number;
+  tokens: number;
+}
+
+export interface SkillMeta {
+  path: string;
+  title: string;
+  description: string;
+  isSkill: boolean;
+  source: SkillStats;
+  runtime: SkillStats;
+  files?: number;
+  typical?: number;
+  p95?: number;
+  max?: number;
+}
+
+/**
+ * A reference to a compiled skill or resource.
+ *
+ * Both skills (directories with SKILL.md) and resources (individual .md files)
+ * share the same API surface — `.meta` for metadata and `.read()` for the
+ * compiled runtime markdown.
+ */
+/** Which markdown elements to strip during compilation. All default to true. */
+export interface StripOptions {
+  /** HTML comments: <!-- ... --> */
+  comment?: boolean;
+  /** Bold, italic, strikethrough: ** _ ~~ */
+  formatting?: boolean;
+  /** Images: ![alt](url) */
+  image?: boolean;
+  /** Blockquotes: > text */
+  blockquote?: boolean;
+  /** Horizontal rules: --- *** ___ */
+  thematicBreak?: boolean;
+  /** Bullet markers: * - + */
+  bullet?: boolean;
+  /** Extra blank lines and trailing whitespace */
+  whitespace?: boolean;
+}
+
+export interface SkillRef {
+  readonly meta: SkillMeta;
+  /** Read the compiled runtime markdown. */
+  read(): Promise<string>;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "review-skill",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "review-skill": "./bin/cli.js"
+  },
+  "files": ["dist", "bin"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@review-skill/compiler": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
