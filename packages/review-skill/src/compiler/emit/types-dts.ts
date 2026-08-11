@@ -4,16 +4,18 @@ import type { SkillMeta } from "../../types.js";
 
 const LABELS: Record<string, Record<string, string>> = {
   en: {
+    sourceTitle: "── Current file ──",
+    runtimeTitle: "── Estimated after build ──",
     files: "Files",
     characters: "Chars",
     tokens: "Tokens",
-    runtimeTitle: "── Estimated after build ──",
   },
   "zh-CN": {
+    sourceTitle: "── 当前文件 ──",
+    runtimeTitle: "── 预计编译后 ──",
     files: "文件数",
     characters: "字符数",
     tokens: "Token",
-    runtimeTitle: "── 预计编译后 ──",
   },
 };
 
@@ -68,10 +70,14 @@ export async function emitTypesDts(
     lines.push(` *`);
     lines.push(` * 📄 ${sourceFile}`);
     lines.push(` *`);
-    lines.push(` * ${L.runtimeTitle}`);
+    lines.push(` * ${L.sourceTitle}`);
     if (entry.isSkill && entry.files) {
       lines.push(` * - ${pad(L.files, labelW - 2)} ${entry.files.toLocaleString()}`);
     }
+    lines.push(` * - ${pad(L.characters, labelW - 2)} ${entry.source.characters.toLocaleString()}`);
+    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${entry.source.tokens.toLocaleString()}`);
+    lines.push(` *`);
+    lines.push(` * ${L.runtimeTitle}`);
     lines.push(` * - ${pad(L.characters, labelW - 2)} ${entry.runtime.characters.toLocaleString()}`);
     const rt = entry.runtime.tokens;
     const sr = entry.source.tokens;
