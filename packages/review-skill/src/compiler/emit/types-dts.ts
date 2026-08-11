@@ -77,17 +77,17 @@ export async function emitTypesDts(
     const cpct = sc > 0 ? ((1 - rc / sc) * 100).toFixed(1) : "0.0";
     const tpct = sr > 0 ? ((1 - rt / sr) * 100).toFixed(1) : "0.0";
 
-    lines.push(` * ─────────────────────`);
-    lines.push(` * **${L.sourceTitle}**`);
-    if (entry.isSkill && entry.files) {
-      lines.push(` * - ${pad(L.files, labelW - 2)} ${entry.files.toLocaleString()}`);
-    }
-    lines.push(` * - ${pad(L.characters, labelW - 2)} ${sc.toLocaleString()}`);
-    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${sr.toLocaleString()}`);
     lines.push(` *`);
-    lines.push(` * **${L.runtimeTitle}**`);
-    lines.push(` * - ${pad(L.characters, labelW - 2)} ${rc.toLocaleString()}  \`${cpct}%↓\``);
-    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()}  \`${tpct}%↓\``);
+    lines.push(` * ${L.sourceTitle}`);
+    if (entry.isSkill && entry.files) {
+      lines.push(` *   ${pad(L.files, labelW - 2)} ${entry.files.toLocaleString()}`);
+    }
+    lines.push(` *   ${pad(L.characters, labelW - 2)} ${sc.toLocaleString()}`);
+    lines.push(` *   ${pad(L.tokens, labelW - 2)} ~${sr.toLocaleString()}`);
+    lines.push(` *`);
+    lines.push(` * ${L.runtimeTitle}`);
+    lines.push(` *   ${pad(L.characters, labelW - 2)} ${rc.toLocaleString()}  \`↓${cpct}%\``);
+    lines.push(` *   ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()}  \`↓${tpct}%\``);
     lines.push(" */");
     return lines.join("\n");
   }
