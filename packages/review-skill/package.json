@@ -1,6 +1,6 @@
 {
   "name": "review-skill",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Compile Markdown Agent Skills into type-safe, token-aware runtime artifacts",
   "type": "module",
   "bin": {
