@@ -54,3 +54,12 @@ export function resolveSkill(
   }
   return createSkill(path, entry, baseDir);
 }
+
+// ── Default skill() export ──────────────────────────────────
+
+const _meta = loadMetadata(".skill");
+
+/** Get a compiled skill by path. Works without the generated .skill/skill.ts wrapper. */
+export function skill(path: string): SkillRef {
+  return resolveSkill(path, _meta, ".skill");
+}

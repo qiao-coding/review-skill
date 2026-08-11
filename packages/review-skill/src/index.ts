@@ -1,4 +1,4 @@
-export { defineConfig, loadMetadata, createSkill, resolveSkill } from "./skill.js";
+export { defineConfig, loadMetadata, createSkill, resolveSkill, skill } from "./skill.js";
 export type {
   SkillPath,
   ResourcePath,
