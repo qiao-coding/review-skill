@@ -15,6 +15,17 @@ Language: English | [简体中文](README.zh-CN.md)
 
 `review-skill` helps developers manage agent instructions like application assets. Write reusable skills in Markdown, compile them once, and consume them from TypeScript through the generated `@review-skill/skill` path alias.
 
+### Where it fits
+
+```
+You write Markdown            review-skill compiles          Your agent reads
+skills/                        ↓                             .skill/runtime/
+  SKILL.md          →          token-optimized runtime       system prompt
+  review/rules.md   →          typed imports                 review.content
+```
+
+Other tools inject into AGENTS.md or generate standalone agents. **review-skill is for TypeScript developers who want their skills tracked like code dependencies** — autocomplete, hover info, type-checking, and token stats, all through the compiler's generated type declarations. No IDE plugin needed.
+
 ## Features
 
 ### 1. Write skills as Markdown

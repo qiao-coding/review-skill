@@ -15,6 +15,17 @@
 
 `review-skill` 帮开发者把 Agent 指令当成工程资产来管理。你用 Markdown 编写可复用 Skill，编译一次，然后在 TypeScript 中通过生成的 `@review-skill/skill` 路径别名安全引用。
 
+### 定位
+
+```
+你写的 Markdown               review-skill 编译            agent 读取
+skills/                        ↓                           .skill/runtime/
+  SKILL.md          →          token 最优运行时              system prompt
+  review/rules.md   →          类型化导入                    rules.content
+```
+
+其他工具把 Markdown 注入 AGENTS.md 或生成独立 agent。**review-skill 面向 TypeScript 开发者，把 Skill 当成代码依赖来追踪**——自动补全、Hover 信息、类型检查、Token 统计，全部由编译器生成，零插件。
+
 ## 功能介绍
 
 ### 1. 用 Markdown 编写 Skill
