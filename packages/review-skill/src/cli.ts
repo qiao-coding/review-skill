@@ -35,7 +35,7 @@ async function loadConfig(): Promise<SkillConfig> {
     const configPath = join(cwd, `skill.config${ext}`);
     if (!existsSync(configPath)) continue;
     try {
-      const configUrl = `file:///${configPath.replace(/\\/g, "/")}`;
+      const configUrl = `file:///${configPath.replace(/\\/g, "/")}?t=${Date.now()}`;
       const mod = await import(configUrl);
       return (mod.default ?? mod) as SkillConfig;
     } catch {
