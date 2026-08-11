@@ -54,14 +54,10 @@ const rules = skill("/react/rules/state.md");
 ### 3. See skill metadata on hover
 
 Hover any generated `skill()` call to see the skill title, description, source
-file, file count, character count, and token estimate.
+file, current character/token count, estimated compiled runtime size, and the
+percentage saved.
 
-![skill hover summary](assets/hover-tip-a.png)
-
-The hover card also shows estimated post-build character count, tokens, and
-the percentage saved.
-
-![skill hover token stats](assets/hover-tip-b.png)
+![skill hover metadata and token stats](assets/hover-tip.png)
 
 ### 4. Ship optimized prompt content
 

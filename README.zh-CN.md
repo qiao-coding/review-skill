@@ -48,13 +48,9 @@ const rules = skill("/react/rules/state.md");
 
 ### 3. Hover 查看 Skill 信息
 
-在任意生成的 `skill()` 调用上 hover，可以看到 Skill 标题、描述、源文件、文件数、字符数和 token 估算。
+在任意生成的 `skill()` 调用上 hover，可以看到 Skill 标题、描述、源文件、当前字符数/token，以及预计编译后的运行时大小和节省比例。
 
-![Skill hover 摘要](assets/hover-tip-a.png)
-
-hover 下半部分展示预计编译后的字符数和 token，并标注节省比例。
-
-![Skill hover token 统计](assets/hover-tip-b.png)
+![Skill hover 元信息和 token 统计](assets/hover-tip.png)
 
 ### 4. 输出更省 token 的 prompt 内容
 
