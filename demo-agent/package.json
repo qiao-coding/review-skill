@@ -6,9 +6,6 @@
     "skill:build": "review-skill",
     "skill:dev": "review-skill --watch"
   },
-  "dependencies": {
-    "review-skill": "file:../packages/review-skill"
-  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "review-skill": "file:../packages/review-skill",
