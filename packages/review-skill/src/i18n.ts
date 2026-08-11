@@ -18,6 +18,7 @@ Config: skill.config.js (optional)
     initDone1: "Done. Try these commands:",
     initDone2: "  npm run skill:build      (compile once)",
     initDone3: "  npm run skill:dev        (watch mode)",
+    initEsm: 'Set "type": "module" in package.json',
     initScripts: "Add scripts to package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `Compiled ${files} files in ${ms}ms\n  ${skills} skills  |  Source ${src} → Runtime ${rt} tokens  |  -${rate}%\n`,
@@ -44,6 +45,7 @@ Config: skill.config.js (optional)
     initDone1: "完成。试试以下命令：",
     initDone2: "  npm run skill:build      (编译)",
     initDone3: "  npm run skill:dev        (监听模式)",
+    initEsm: '设置 package.json 的 "type": "module"',
     initScripts: "添加 scripts 到 package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill  |  源文件 ${src} → 运行时 ${rt} tokens  |  -${rate}%\n`,

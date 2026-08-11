@@ -30,15 +30,19 @@ interface SkillConfig {
 }
 
 async function loadConfig(): Promise<SkillConfig> {
-  const configPath = join(cwd, "skill.config.js");
-  if (!existsSync(configPath)) return {};
-  try {
-    const configUrl = `file:///${configPath.replace(/\\/g, "/")}`;
-    const mod = await import(configUrl);
-    return (mod.default ?? mod) as SkillConfig;
-  } catch {
-    return {};
+  // Try .mjs first (always works), then .js (needs "type":"module")
+  for (const ext of [".mjs", ".js"]) {
+    const configPath = join(cwd, `skill.config${ext}`);
+    if (!existsSync(configPath)) continue;
+    try {
+      const configUrl = `file:///${configPath.replace(/\\/g, "/")}`;
+      const mod = await import(configUrl);
+      return (mod.default ?? mod) as SkillConfig;
+    } catch {
+      continue;
+    }
   }
+  return {};
 }
 
 // ── Init ─────────────────────────────────────────────────
@@ -58,7 +62,17 @@ if (isInit) {
     console.log(`○ ${msg("initSkillsExists")}`);
   }
 
-  const configPath = join(cwd, "skill.config.js");
+  // Detect package.json type to determine config extension
+  const pkgPath = join(cwd, "package.json");
+  let isEsm = false;
+  if (existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
+      isEsm = pkg.type === "module";
+    } catch { /* ignore */ }
+  }
+  const configExt = isEsm ? ".js" : ".mjs";
+  const configPath = join(cwd, `skill.config${configExt}`);
   if (!existsSync(configPath)) {
     await writeFile(configPath, [
       'import { defineConfig } from "review-skill";',
@@ -99,12 +113,19 @@ if (isInit) {
     console.log(`✔ ${msg("initGitignore")}`);
   }
 
-  // Inject scripts into package.json
-  const pkgPath = join(cwd, "package.json");
+  // Inject scripts + ensure ESM
   if (existsSync(pkgPath)) {
     const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
-    if (!pkg.scripts) pkg.scripts = {};
     let updated = false;
+
+    // Ensure "type": "module" (required for .skill/skill.ts)
+    if (pkg.type !== "module") {
+      pkg.type = "module";
+      updated = true;
+      console.log(`✔ ${msg("initEsm")}`);
+    }
+
+    if (!pkg.scripts) pkg.scripts = {};
     if (!pkg.scripts["skill:build"]) {
       pkg.scripts["skill:build"] = "review-skill";
       updated = true;
