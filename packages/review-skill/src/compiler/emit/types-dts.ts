@@ -9,10 +9,6 @@ const LABELS: Record<string, Record<string, string>> = {
     characters: "Chars",
     tokens: "Tokens",
     runtimeTitle: "── Runtime ──",
-    core: "Core",
-    typical: "Typical",
-    p95: "P95",
-    max: "Max",
   },
   "zh-CN": {
     sourceTitle: "── 编译前 ──",
@@ -20,10 +16,6 @@ const LABELS: Record<string, Record<string, string>> = {
     characters: "字符数",
     tokens: "Token",
     runtimeTitle: "── 编译后 ──",
-    core: "核心",
-    typical: "常用",
-    p95: "P95",
-    max: "最大",
   },
 };
 
@@ -86,15 +78,8 @@ export async function emitTypesDts(
     lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${entry.source.tokens.toLocaleString()}`);
     lines.push(` *`);
     lines.push(` * ${L.runtimeTitle}`);
-    if (entry.isSkill && entry.typical) {
-      lines.push(` * - ${pad(L.core, labelW - 2)} ~${entry.runtime.tokens.toLocaleString()}`);
-      lines.push(` * - ${pad(L.typical, labelW - 2)} ~${entry.typical.toLocaleString()}`);
-      if (entry.p95) lines.push(` * - ${pad(L.p95, labelW - 2)} ~${entry.p95.toLocaleString()}`);
-      if (entry.max) lines.push(` * - ${pad(L.max, labelW - 2)} ~${entry.max.toLocaleString()}`);
-    } else {
-      lines.push(` * - ${pad(L.characters, labelW - 2)} ${entry.runtime.characters.toLocaleString()}`);
-      lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${entry.runtime.tokens.toLocaleString()}`);
-    }
+    lines.push(` * - ${pad(L.characters, labelW - 2)} ${entry.runtime.characters.toLocaleString()}`);
+    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${entry.runtime.tokens.toLocaleString()}`);
     lines.push(" */");
     return lines.join("\n");
   }

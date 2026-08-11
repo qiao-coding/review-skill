@@ -60,14 +60,10 @@ export async function compile(
       runtime: { characters: runtimeChars, tokens: runtimeTokens },
     };
 
-    // Add aggregate stats for skills
+    // Count files per skill
     if (file.isSkill) {
       const skillKey = file.relativePath.replace(/\/?SKILL\.md$/, "") || "/";
-      const fileCount = skillFileCount.get(skillKey) ?? 1;
-      entry.files = fileCount;
-      entry.typical = runtimeTokens;
-      entry.p95 = Math.round(runtimeTokens * 1.2);
-      entry.max = Math.round(runtimeTokens * 1.5);
+      entry.files = skillFileCount.get(skillKey) ?? 1;
     }
 
     entries.push(entry);

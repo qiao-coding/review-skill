@@ -15,9 +15,6 @@ export interface SkillMeta {
   source: SkillStats;
   runtime: SkillStats;
   files?: number;
-  typical?: number;
-  p95?: number;
-  max?: number;
 }
 
 /**
