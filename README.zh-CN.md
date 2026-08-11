@@ -68,7 +68,7 @@ const rules = skill("/react/rules/state.md");
 
 `review-skill` 会清理代码块外的 prompt 噪声，包括注释、格式标记、图片语法、多余空行和行尾空白。代码示例会原样保留。
 
-开发时为了结合业务，我们写 Markdown 时会尽量声明意图，让它适合开发者、Claude Code、Codex 等工具阅读，所以它可以保留注释、格式、空行、表格和内部说明。
+开发时为了结合业务，我们写 Markdown 时会尽量声明意图，让它适合开发者或者 Claude Code、Codex 等工具阅读，所以它可以保留注释、格式、空行、表格和内部说明。
 
 ![编译前的 Skill 源文件](assets/dev-skill.png)
 
