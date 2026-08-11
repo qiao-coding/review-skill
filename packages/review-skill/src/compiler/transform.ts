@@ -261,15 +261,17 @@ export async function transformMarkdown(
   const result = await processor.process(sourceContent);
   let output = String(result);
 
-  // Post-stringify cleanup — controlled by bullet/whitespace options
+  // Post-stringify cleanup — each option controls its own regex
   output = protectCodeBlocks(output, (text) => {
     let t = text;
-    if (opts.bullet)     t = t.replace(/^[\*\-\+]\s/gm, "");
-    if (opts.whitespace) t = t.replace(/^\s*[-=*_]{3,}\s*$/gm, "");
-    if (opts.whitespace) t = t.replace(/[ \t]+$/gm, "");
-    if (opts.whitespace) t = t.replace(/\n{2,}/g, "\n");
-    if (opts.whitespace) t = t.replace(/^\n+/, "").replace(/\n+$/, "\n");
-    if (opts.whitespace) t = t.replace(/\n{2,}/g, "\n");
+    if (opts.bullet)         t = t.replace(/^[\*\-\+]\s/gm, "");
+    if (opts.thematicBreak)  t = t.replace(/^\s*[-=*_]{3,}\s*$/gm, "");
+    if (opts.whitespace) {
+      t = t.replace(/[ \t]+$/gm, "");
+      t = t.replace(/\n{2,}/g, "\n");
+      t = t.replace(/^\n+/, "").replace(/\n+$/, "\n");
+      t = t.replace(/\n{2,}/g, "\n");
+    }
     return t;
   });
 
