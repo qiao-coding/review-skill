@@ -19,7 +19,7 @@ Config: skill.config.js (optional)
     initDone2: "  npm run skill:build      (compile once)",
     initDone3: "  npm run skill:dev        (watch mode)",
     initEsm: 'Set "type": "module" in package.json',
-    initTsconfig: "Add @skill path alias to tsconfig.json",
+    initTsconfig: "Add @review-skill/skill path alias to tsconfig.json",
     initScripts: "Add scripts to package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `Compiled ${files} files in ${ms}ms\n  ${skills} skills  |  Source ${src} → Runtime ${rt} tokens  |  -${rate}%\n`,
@@ -47,7 +47,7 @@ Config: skill.config.js (optional)
     initDone2: "  npm run skill:build      (编译)",
     initDone3: "  npm run skill:dev        (监听模式)",
     initEsm: '设置 package.json 的 "type": "module"',
-    initTsconfig: "添加 @skill 路径别名到 tsconfig.json",
+    initTsconfig: "添加 @review-skill/skill 路径别名到 tsconfig.json",
     initScripts: "添加 scripts 到 package.json",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill  |  源文件 ${src} → 运行时 ${rt} tokens  |  -${rate}%\n`,

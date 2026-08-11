@@ -125,8 +125,8 @@ if (isInit) {
   if (!tsc.compilerOptions.baseUrl) tsc.compilerOptions.baseUrl = ".";
   if (!tsc.compilerOptions.paths) tsc.compilerOptions.paths = {};
   if (!tsc.include) tsc.include = ["src", ".skill"];
-  if (!tsc.compilerOptions.paths["@skill"]) {
-    tsc.compilerOptions.paths["@skill"] = [".skill/skill.ts"];
+  if (!tsc.compilerOptions.paths["@review-skill/skill"]) {
+    tsc.compilerOptions.paths["@review-skill/skill"] = ["./.skill/skill.ts"];
     await writeFile(tsconfigPath, JSON.stringify(tsc, null, 2) + "\n", "utf-8");
     console.log(`✔ ${msg("initTsconfig")}`);
   }

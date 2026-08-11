@@ -5,7 +5,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "baseUrl": ".",
-    "paths": { "@skill": [".skill/skill.ts"] },
+    "paths": { "@review-skill/skill": ["./.skill/skill.ts"] },
     "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "."

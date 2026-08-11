@@ -1,4 +1,4 @@
-import { skill } from "@skill";
+import { skill } from "@review-skill/skill";
 
 const root = skill("/");
 const rules = skill("/react/rules/state.md");
