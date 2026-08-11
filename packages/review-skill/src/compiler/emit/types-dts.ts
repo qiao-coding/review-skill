@@ -77,19 +77,17 @@ export async function emitTypesDts(
     const cpct = sc > 0 ? ((1 - rc / sc) * 100).toFixed(1) : "0.0";
     const tpct = sr > 0 ? ((1 - rt / sr) * 100).toFixed(1) : "0.0";
 
-    lines.push(` *`);
-    lines.push(` * ${L.sourceTitle}`);
-    if (entry.isSkill && entry.files) {
-      lines.push(` *   ${pad(L.files, labelW - 2)} ${entry.files.toLocaleString()}`);
-    }
-    lines.push(` *   ${pad(L.characters, labelW - 2)} ${sc.toLocaleString()}`);
-    lines.push(` *   ${pad(L.tokens, labelW - 2)} ~${sr.toLocaleString()}`);
-    lines.push(` *`);
-    lines.push(` * ${L.runtimeTitle}`);
     const cs = rc < sc ? `-${cpct}` : `+${cpct}`;
     const ts = rt < sr ? `-${tpct}` : `+${tpct}`;
-    lines.push(` *   ${pad(L.characters, labelW - 2)} ${rc.toLocaleString()}  \`${cs}%\``);
-    lines.push(` *   ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()}  \`${ts}%\``);
+
+    const srcChars = `${L.characters} ${sc.toLocaleString()}`;
+    const srcTokens = `${L.tokens} ~${sr.toLocaleString()}`;
+    const rtChars = `${L.characters} ${rc.toLocaleString()} (${cs}%)`;
+    const rtTokens = `${L.tokens} ~${rt.toLocaleString()} (${ts}%)`;
+
+    lines.push(` *`);
+    lines.push(` * > ${L.sourceTitle} | ${srcChars} | ${srcTokens}`);
+    lines.push(` * > ${L.runtimeTitle} | ${rtChars} | ${rtTokens}`);
     lines.push(" */");
     return lines.join("\n");
   }
