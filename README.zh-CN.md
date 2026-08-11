@@ -11,6 +11,7 @@
 - [功能介绍](#功能介绍)
 - [快速开始](#快速开始)
 - [不同 Agent 框架如何接入](#不同-agent-框架如何接入)
+- [配置](#配置)
 
 `review-skill` 帮开发者把 Agent 指令当成工程资产来管理。你用 Markdown 编写可复用 Skill，编译一次，然后在 TypeScript 中通过生成的 `@review-skill/skill` 路径别名安全引用。
 
@@ -46,21 +47,21 @@ const root = skill("/");
 const rules = skill("/react/rules/state.md");
 ```
 
-### 3. Hover 查看 Skill 信息
+### 3. 在 TypeScript 悬浮提示中查看 Skill 元信息
 
-在任意生成的 `skill()` 调用上 hover，可以看到 Skill 标题、描述、源文件、当前字符数/token，以及预计编译后的运行时大小和节省比例。
+在支持 TypeScript 的编辑器里，把光标悬停到生成的 `skill()` 调用上，可以看到 Skill 标题、描述、源文件、当前字符数/token、预计编译后的运行时大小和节省比例。
 
-![Skill hover 元信息和 token 统计](assets/hover-tip.png)
+![Skill TypeScript 悬浮提示元信息和 token 统计](assets/hover-tip.png)
 
 ### 4. 输出更省 token 的 prompt 内容
 
 `review-skill` 会清理代码块外的 prompt 噪声，包括注释、格式标记、图片语法、多余空行和行尾空白。代码示例会原样保留。
 
-开发时为了结合业务，我们写 Markdown 时会尽量声明意图以适合开发者和cc，codex去阅读，所以它需要有注释、格式、空行、表格和内部说明。
+开发时为了结合业务，我们写 Markdown 时会尽量声明意图，让它适合开发者、Claude Code、Codex 等工具阅读，所以它可以保留注释、格式、空行、表格和内部说明。
 
 ![编译前的 Skill 源文件](assets/dev-skill.png)
 
-对人类有帮助的格式和说明，并不一定都需要进入模型运行时。HTML 注释、图片引用、装饰性 Markdown 标记和多余空白会增加输入字符，并可能引入与任务无关的结构信息。review-skill 因此将开发态 Markdown 和运行态 Markdown 分离，只保留执行所需内容。
+对开发者有帮助的格式和说明，并不一定都需要进入模型运行时。`review-skill` 将开发态 Markdown 和运行态 Markdown 分离，只保留执行所需内容。
 
 ![编译后的 Skill 运行时内容](assets/build-skill.png)
 
@@ -217,7 +218,7 @@ agent.setSystemPrompt(guide.content);
 
 ## 配置
 
-`skill.config.js` 控制编译时清除哪些元素：
+`skill.config.js` 控制编译时清理哪些元素：
 
 ```js
 import { defineConfig } from "review-skill";
@@ -226,18 +227,18 @@ export default defineConfig({
   skillsDir: "skills",
   outputDir: ".skill",
   strip: {
-    comment: true,        // <!-- HTML 注释 -->
-    formatting: true,     // **加粗** *斜体* ~~删除线~~
-    image: true,          // ![图片](url)
-    blockquote: true,     // > 引用
-    thematicBreak: true,  // --- 分割线
-    bullet: true,         // * - + 列表符
-    whitespace: true,     // 多余空行、行尾空格
+    comment: true,        // <!-- HTML comments -->
+    formatting: true,     // **bold** *italic* ~~strike~~
+    image: true,          // ![alt](url)
+    blockquote: true,     // > quotes
+    thematicBreak: true,  // --- horizontal rules
+    bullet: true,         // * - + list markers
+    whitespace: true,     // blank lines, trailing spaces
   },
 });
 ```
 
-想保留哪个格式，把对应项设为 `false` 即可。
+想保留某类格式时，把对应项设为 `false` 即可。
 
 ## 链接
 

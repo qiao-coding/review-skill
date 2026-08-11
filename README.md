@@ -11,17 +11,15 @@ Language: English | [简体中文](README.zh-CN.md)
 - [Features](#features)
 - [Quick start](#quick-start)
 - [Agent framework integrations](#agent-framework-integrations)
+- [Configuration](#configuration)
 
-`review-skill` helps developers manage agent instructions like application
-assets. Write reusable skills in Markdown, compile them once, and consume them
-from TypeScript through the generated `@review-skill/skill` path alias.
+`review-skill` helps developers manage agent instructions like application assets. Write reusable skills in Markdown, compile them once, and consume them from TypeScript through the generated `@review-skill/skill` path alias.
 
 ## Features
 
 ### 1. Write skills as Markdown
 
-Keep agent behavior in a clear `skills/` directory. Human-readable Markdown
-stays in source control; generated runtime files stay in `.skill/`.
+Keep agent behavior in a clear `skills/` directory. Human-readable Markdown stays in source control; generated runtime files stay in `.skill/`.
 
 ```text
 skills/
@@ -38,9 +36,7 @@ skills/
 
 ### 2. Autocomplete every skill path
 
-After compilation, `skill("/")` and every nested skill/resource path are
-available to your editor. You no longer need to hand-write fragile relative
-`readFile(...)` paths.
+After compilation, `skill("/")` and every nested skill/resource path are available to your editor. You no longer need to hand-write fragile relative `readFile(...)` paths.
 
 ![skill path autocomplete](assets/router-tip.png)
 
@@ -51,34 +47,27 @@ const root = skill("/");
 const rules = skill("/react/rules/state.md");
 ```
 
-### 3. See skill metadata on hover
+### 3. Inspect metadata in TypeScript hover tooltips
 
-Hover any generated `skill()` call to see the skill title, description, source
-file, current character/token count, estimated compiled runtime size, and the
-percentage saved.
+Place the cursor over a generated `skill()` call in a TypeScript-aware editor to see the skill title, description, source file, current character/token count, estimated compiled runtime size, and percentage saved.
 
-![skill hover metadata and token stats](assets/hover-tip.png)
+![skill TypeScript hover tooltip with metadata and token stats](assets/hover-tip.png)
 
 ### 4. Ship optimized prompt content
 
-`review-skill` removes prompt noise outside code blocks, including comments,
-formatting markers, image syntax, extra blank lines, and trailing whitespace.
-Code examples stay intact.
+`review-skill` removes prompt noise outside code blocks, including comments, formatting markers, image syntax, extra blank lines, and trailing whitespace. Code examples stay intact.
 
-During development, keep your skill files readable with comments, formatting,
-tables, and internal notes:
+During development, keep your skill files readable with comments, formatting, tables, and internal notes:
 
 ![source skill before compilation](assets/dev-skill.png)
 
-After compilation, the runtime Markdown is cleaner and cheaper to send to the
-model:
+After compilation, the runtime Markdown is cleaner and cheaper to send to the model:
 
 ![compiled skill after optimization](assets/build-skill.png)
 
 ### 5. Use the output in any agent stack
 
-Compiled resources are plain Markdown strings, so they can be used as system
-prompts, developer instructions, tool rules, review policies, or RAG chunks.
+Compiled resources are plain Markdown strings, so they can be used as system prompts, developer instructions, tool rules, review policies, or RAG chunks.
 
 ## Quick start
 
@@ -94,9 +83,7 @@ npm install review-skill
 npx review-skill --init
 ```
 
-This creates `skills/SKILL.md`, adds `.skill/` to `.gitignore`, generates
-`skill.config.js` or `skill.config.mjs`, configures the `@review-skill/skill`
-TypeScript path alias, and adds useful npm scripts when possible.
+This creates `skills/SKILL.md`, adds `.skill/` to `.gitignore`, generates `skill.config.js` or `skill.config.mjs`, configures the `@review-skill/skill` TypeScript path alias, and adds useful npm scripts when possible.
 
 ### 3. Write a skill
 
