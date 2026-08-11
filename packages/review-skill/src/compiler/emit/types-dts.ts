@@ -86,8 +86,8 @@ export async function emitTypesDts(
     lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${sr.toLocaleString()}`);
     lines.push(` *`);
     lines.push(` * **${L.runtimeTitle}**`);
-    lines.push(` * - ${pad(L.characters, labelW - 2)} ${rc.toLocaleString()} (-${cpct}%)`);
-    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()} (-${tpct}%)`);
+    lines.push(` * - ${pad(L.characters, labelW - 2)} ${rc.toLocaleString()}  \`${cpct}%↓\``);
+    lines.push(` * - ${pad(L.tokens, labelW - 2)} ~${rt.toLocaleString()}  \`${tpct}%↓\``);
     lines.push(" */");
     return lines.join("\n");
   }
