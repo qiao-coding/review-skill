@@ -177,6 +177,8 @@ import { defineConfig } from "review-skill";
 export default defineConfig({
   skillsDir: "skills",
   outputDir: ".skill",
+  // "absorb"(默认)把链接内容合并进自包含输出；"keep" 保留链接供消费方运行时路由。
+  merge: "absorb",
   // 想保留的条目删掉；完全省略 strip 则原样返回：
   strip: [
     "<!-- HTML -->", // HTML 注释
@@ -195,6 +197,8 @@ export default defineConfig({
 可用 token（见 `STRIP_TOKENS`）：`"<!-- HTML -->"` HTML 注释 · `"**bold**"` 粗体 · `"*italic*"` 斜体 · `"~~strikethrough~~"` 删除线 · `"![alt](url)"` 图片 · `"> quote"` 引用块 · `"---"` 分隔线 · `"- item"` 列表符号 · `"\n\n"` 空行折叠。空数组 `strip: []` 不剥离任何内容。
 
 旧的对象形式（`strip: { formatting: false }`）仍可用但已弃用——编译器会提示等价的 token 数组。迁移指南：[docs/strip.md](docs/strip.md)。
+
+`merge` 控制链接处理：`"absorb"`（默认）编译期内联链接内容，每个 skill 自包含；`"keep"` 在运行时输出里保留链接，由消费方动态解析（比如按游戏状态选结局）。想要运行时链接路由时用 `"keep"`。
 
 ## 消费 skill
 

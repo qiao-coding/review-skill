@@ -150,6 +150,22 @@ describe("skill() runtime", () => {
     expect(result.warnings.length).toBe(0);
   });
 
+  it("preserves links when merge is 'keep' (dynamic routing)", async () => {
+    const keepRoot = join(root, "keep");
+    const keepSkills = join(keepRoot, "skills");
+    const keepOut = join(keepRoot, ".skill");
+    mkdirSync(join(keepSkills, "rules"), { recursive: true });
+    writeFileSync(join(keepSkills, "SKILL.md"), "# Root\n\nSee [state rules](../rules/state.md) for details.\n", "utf-8");
+    writeFileSync(join(keepSkills, "rules", "state.md"), "# State Rules\n\nKeep it pure.\n", "utf-8");
+
+    const result = await compile(keepSkills, keepOut, undefined, "en", { merge: "keep" });
+    expect(result.warnings.length).toBe(0);
+    const runtime = readFileSync(join(keepOut, "runtime", "SKILL.md"), "utf-8");
+    // links are preserved for runtime routing — not merged into the output
+    expect(runtime).toContain("[state rules](../rules/state.md)");
+    expect(runtime).not.toContain("Keep it pure.");
+  });
+
   it("keeps dynamic-route links (placeholder segments) without warning", async () => {
     const dynRoot = join(root, "dyn");
     const dynSkills = join(dynRoot, "skills");

@@ -15,6 +15,14 @@ import type { SkillMeta, StripOptions, Strip } from "../types.js";
 export interface CompileOptions {
   /** Number of runtime lines embedded as a hover preview in the generated JSDoc. */
   previewLines?: number;
+  /**
+   * How to treat links to other skills.
+   * - `"absorb"` (default): recursively inline linked content at compile time —
+   *   each runtime output is self-contained.
+   * - `"keep"`: preserve links in the runtime output for dynamic routing — the
+   *   consumer resolves links at runtime (e.g. picks an ending by game state).
+   */
+  merge?: "absorb" | "keep";
 }
 
 export interface CompileResult {
@@ -127,14 +135,18 @@ export async function compile(
     }
   }
 
-  // Compile-time link merging — each runtime output is self-contained: links to
-  // other skills/resources are recursively absorbed (no URL noise for the agent).
-  // Resolve relative to the containing file (a skill's file is `<path>/SKILL.md`).
+  // Link merging — default "absorb" makes each runtime output self-contained
+  // (links recursively inlined, no URL noise). "keep" preserves links so the
+  // consumer can route dynamically at runtime. Resolve relative to the
+  // containing file (a skill's file is `<path>/SKILL.md`).
+  const keepLinks = opts?.merge === "keep";
   const mergedContent = new Map<string, string>();
   for (const entry of entries) {
     const raw = contentMap.get(entry.path) ?? "";
     const filePath = entry.isSkill ? `${entry.path}/SKILL.md` : entry.path;
-    const content = absorbLinks(raw, filePath, (p) => contentMap.get(p) ?? null);
+    const content = keepLinks
+      ? raw
+      : absorbLinks(raw, filePath, (p) => contentMap.get(p) ?? null);
     mergedContent.set(entry.path, content);
     entry.runtime = { characters: content.length, tokens: estimateTokens(content.length) };
     await emitRuntime(entry.path, content, outputDir);

@@ -45,6 +45,8 @@ interface SkillConfig {
   strip?: StripOptions | Strip;
   /** Number of runtime lines embedded as a hover preview in the generated JSDoc. */
   previewLines?: number;
+  /** Link handling: `"absorb"` (default, self-contained) or `"keep"` (dynamic routing). */
+  merge?: "absorb" | "keep";
 }
 
 async function loadConfig(): Promise<SkillConfig> {
@@ -207,6 +209,7 @@ async function build() {
     const start = Date.now();
     const result = await compile(skillsDir, outputDir, config.strip, lang, {
       previewLines: config.previewLines,
+      merge: config.merge,
     });
 
     for (const w of result.warnings) {

@@ -177,6 +177,9 @@ import { defineConfig } from "review-skill";
 export default defineConfig({
   skillsDir: "skills",
   outputDir: ".skill",
+  // "absorb" (default) merges linked content into a self-contained output;
+  // "keep" preserves links so the consumer can route them at runtime.
+  merge: "absorb",
   // delete entries you want KEPT; omit strip entirely to return the original:
   strip: [
     "<!-- HTML -->", // HTML comments
@@ -195,6 +198,8 @@ export default defineConfig({
 Available tokens (see `STRIP_TOKENS`): `"<!-- HTML -->"` HTML comments · `"**bold**"` bold · `"*italic*"` italic · `"~~strikethrough~~"` strikethrough · `"![alt](url)"` images · `"> quote"` blockquotes · `"---"` horizontal rules · `"- item"` bullet markers · `"\n\n"` blank-line collapse. An empty array `strip: []` strips nothing.
 
 The legacy object form (`strip: { formatting: false }`) still works but is deprecated — the compiler warns with the exact equivalent token array. Migration guide: [docs/strip.md](docs/strip.md).
+
+`merge` controls link handling: `"absorb"` (default) inlines linked content at compile time so each skill is self-contained; `"keep"` preserves the links in the runtime output so the consumer resolves them dynamically (e.g. picks an ending by game state). Use `"keep"` when you want runtime link routing.
 
 ## Consuming skills
 
