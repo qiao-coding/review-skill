@@ -65,6 +65,17 @@ describe.sequential("CLI --init", () => {
     expect(pkg.scripts["skill:dev"]).toBeTruthy();
   });
 
+  it("adds a ^range review-skill dependency on a fresh project", () => {
+    // The main test root already got a `file:` dep from beforeAll's npm install,
+    // which masks init's behavior — use a clean project to assert the ^range.
+    const fresh = join(root, "fresh");
+    mkdirSync(fresh, { recursive: true });
+    writeFileSync(join(fresh, "package.json"), JSON.stringify({ name: "fresh", private: true }), "utf-8");
+    run("--init", fresh);
+    const pkg = JSON.parse(readFileSync(join(fresh, "package.json"), "utf-8"));
+    expect(pkg.dependencies?.["review-skill"]).toMatch(/^\^\d+\.\d+\.\d+$/);
+  });
+
   it("adds .skill to gitignore", () => {
     const gi = readFileSync(join(root, ".gitignore"), "utf-8");
     expect(gi).toContain(".skill/");

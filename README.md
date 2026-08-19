@@ -82,19 +82,14 @@ Compiled resources are plain Markdown strings, so they can be used as system pro
 
 ## Quick start
 
-### 1. Install
-
-```bash
-npm install review-skill
-```
-
-### 2. Initialize
+### 1. Bootstrap — no manual configuration
 
 ```bash
 npx review-skill --init
+npm install
 ```
 
-This creates `skills/SKILL.md`, adds `.skill/` to `.gitignore`, generates `skill.config.js` or `skill.config.mjs`, configures the `@review-skill/skill` TypeScript path alias, and adds useful npm scripts when possible.
+`--init` creates `skills/SKILL.md`, adds `.skill/` to `.gitignore`, generates `skill.config.js` or `skill.config.mjs`, configures the `@review-skill/skill` TypeScript path alias, adds useful npm scripts, and adds `review-skill` to your `dependencies` — `npm install` then installs it. Compiling needs no config file at all (defaults: `skills/` → `.skill/`).
 
 ### 3. Write a skill
 

@@ -5,13 +5,27 @@
 
 import { compile } from "./compiler/pipeline.js";
 import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
-import { existsSync, watch } from "node:fs";
+import { existsSync, watch, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { msg, lang } from "./i18n.js";
 import type { StripOptions, Strip } from "./types.js";
 
 const cwd = process.cwd();
 const args = process.argv.slice(2);
+
+// Version of the running review-skill — `--init` pins the generated dependency
+// to it. dist/cli.js sits one level below package.json, so "../package.json"
+// resolves to the package root both in source and in the published tarball.
+const pkgVersion = (() => {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf-8")
+    );
+    return (pkg.version as string) || "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+})();
 
 const isInit = args.includes("--init") || args.includes("-i");
 const isWatch = args.includes("--watch") || args.includes("-w");
@@ -143,6 +157,15 @@ if (isInit) {
   if (existsSync(pkgPath)) {
     const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
     let updated = false;
+
+    // Zero-manual-config: the scaffolded config, scripts, and `@review-skill/skill`
+    // runtime import all need review-skill — add it so `npm install` alone suffices.
+    if (!pkg.dependencies?.["review-skill"] && !pkg.devDependencies?.["review-skill"]) {
+      if (!pkg.dependencies) pkg.dependencies = {};
+      pkg.dependencies["review-skill"] = `^${pkgVersion}`;
+      updated = true;
+      console.log(`✔ ${msg("initDependency")}`);
+    }
 
     // Ensure "type": "module" (required for .skill/skill.ts)
     if (pkg.type !== "module") {

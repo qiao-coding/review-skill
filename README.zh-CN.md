@@ -82,19 +82,14 @@ const rules = skill("/react/rules/state.md");
 
 ## 快速开始
 
-### 1. 安装
-
-```bash
-npm install review-skill
-```
-
-### 2. 初始化
+### 1. 初始化——无需手动配置
 
 ```bash
 npx review-skill --init
+npm install
 ```
 
-这会创建 `skills/SKILL.md`，把 `.skill/` 加入 `.gitignore`，生成 `skill.config.js` 或 `skill.config.mjs`，配置 `@review-skill/skill` TypeScript 路径别名，并在可能时添加常用 npm scripts。
+`--init` 会创建 `skills/SKILL.md`、把 `.skill/` 加入 `.gitignore`、生成 `skill.config.js` 或 `skill.config.mjs`、配置 `@review-skill/skill` TypeScript 路径别名、添加常用 npm scripts，并把 `review-skill` 加进你的 `dependencies`——之后只需 `npm install` 一次。编译不需要配置文件（默认 `skills/` → `.skill/`）。
 
 ### 3. 编写 Skill
 

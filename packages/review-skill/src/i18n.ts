@@ -21,6 +21,7 @@ Config: skill.config.js (optional)
     initEsm: 'Set "type": "module" in package.json',
     initTsconfig: "Add @review-skill/skill path alias to tsconfig.json",
     initScripts: "Add scripts to package.json",
+    initDependency: "Add review-skill to package.json dependencies",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `Compiled ${files} files in ${ms}ms\n  ${skills} skills  |  Source ${src} → Runtime ${rt} tokens  |  -${rate}%\n`,
     watchStart: (dir: string) => `Watching ${dir}/**/*.md...\n`,
@@ -63,6 +64,7 @@ Config: skill.config.js (optional)
     initEsm: '设置 package.json 的 "type": "module"',
     initTsconfig: "添加 @review-skill/skill 路径别名到 tsconfig.json",
     initScripts: "添加 scripts 到 package.json",
+    initDependency: "添加 review-skill 到 package.json 依赖",
     buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
       `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill  |  源文件 ${src} → 运行时 ${rt} tokens  |  -${rate}%\n`,
     watchStart: (dir: string) => `正在监听 ${dir}/**/*.md...\n`,
