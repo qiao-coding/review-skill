@@ -165,6 +165,8 @@ Compiling needs no config file — defaults are `skills/` → `.skill/`. The out
 
 Source files carry two audiences: **tooling metadata** (frontmatter, comments, formatting) and the **instructions** the agent should read. Compilation always drops the frontmatter block (variable contracts, titles, descriptions), and `strip` removes the rest of the tooling layer — the runtime is instructions only, never the surrounding explanation.
 
+`---` is contextual: at the very top of a file it delimits the frontmatter block (always dropped); mid-document it's a horizontal rule (the `"---"` strip token).
+
 `skill.config.js` / `skill.config.mjs` controls what compilation strips. `strip` is a **character-based token array**: list the exact markdown syntax literals to remove (each TS-autocompleted); omit anything you want kept. **Not configuring `strip` at all strips nothing — the original file is returned as-is**:
 
 ```js
