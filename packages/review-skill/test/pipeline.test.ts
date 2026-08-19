@@ -149,6 +149,20 @@ describe("skill() runtime", () => {
     const result = await compile(assetSkills, assetOut);
     expect(result.warnings.length).toBe(0);
   });
+
+  it("keeps dynamic-route links (placeholder segments) without warning", async () => {
+    const dynRoot = join(root, "dyn");
+    const dynSkills = join(dynRoot, "skills");
+    const dynOut = join(dynRoot, ".skill");
+    mkdirSync(dynSkills, { recursive: true });
+    writeFileSync(join(dynSkills, "SKILL.md"), "# Root\n\n- [endings/good.md](../../story/【xxx】/good.md)\n", "utf-8");
+
+    const result = await compile(dynSkills, dynOut);
+    expect(result.warnings.length).toBe(0);
+    // the dynamic link is kept for runtime routing — not merged, not warned
+    const runtime = readFileSync(join(dynOut, "runtime", "SKILL.md"), "utf-8");
+    expect(runtime).toContain("[endings/good.md](../../story/【xxx】/good.md)");
+  });
 });
 
 describe("pipeline variables contract", () => {

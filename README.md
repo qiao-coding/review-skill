@@ -121,6 +121,8 @@ The compiler treats links as its reference contract:
 - **Compile-time merging** — the runtime output recursively absorbs linked content, so each skill is self-contained with no URL noise left for the agent. Cycles absorb to the link label.
 - External URLs (`https://`), anchors, `mailto:`, and images (`![alt](url)`) are never treated as references.
 
+> **Dynamic routes**: a link whose path has a placeholder segment (e.g. `[endings](../story/【xxx】/good.md)`, `{id}`) is treated as a runtime route — not validated or merged, but kept in `.content` so the consumer resolves the placeholder at runtime.
+
 > Note: reference-link syntax (`[x][id]` + `[id]: url`) is not yet scanned — use the inline `[x](../path)` form.
 
 ### Templates — {{variables}} + inject()

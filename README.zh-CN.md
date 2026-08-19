@@ -121,6 +121,8 @@ Follow the security constraints in [security](../security/SKILL.md) before draft
 - **编译期合并**——运行时输出递归吸收链接内容，每个 skill 自包含，不给 agent 留 URL 噪音。循环引用吸收为链接文字。
 - 外部 URL（`https://`）、锚点、`mailto:`、图片（`![alt](url)`）永远不会被当作引用。
 
+> **动态路由**：路径含占位符段的链接（如 `[endings](../story/【xxx】/good.md)`、`{id}`）按运行时路由处理——不校验、不合并，保留在 `.content` 里供消费方运行时解析占位符。
+
 > 注意：引用式链接语法（`[x][id]` + `[id]: url`）暂不支持扫描——请使用内联 `[x](../path)` 形式。
 
 ### 模板——{{变量}} + inject()

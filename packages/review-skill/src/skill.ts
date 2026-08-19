@@ -55,6 +55,10 @@ function joinPosix(base: string, url: string): string {
  */
 export function resolveSkillLink(url: string, fromPath: string): string | null {
   if (!url || /^(?:https?:|mailto:|tel:|data:|#|\/\/)/.test(url)) return null;
+  // Dynamic route — the path has a placeholder segment (e.g. 【xxx】 or {id}).
+  // There is no static target to validate or merge: keep the link untouched so
+  // the consumer can resolve the placeholder at runtime.
+  if (/[【{]/.test(url)) return null;
   const resolved = url.startsWith("/") ? url : joinPosix(posixDirname(fromPath), url);
   const stripped = resolved.replace(/\/SKILL\.md$/, "");
   return stripped || "/";
