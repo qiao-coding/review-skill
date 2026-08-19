@@ -81,6 +81,9 @@ describe.sequential("CLI --init", () => {
     // @ and / must be word chars so `@/path` matches snippet prefixes in markdown
     expect(separators).not.toContain("@");
     expect(separators).not.toContain("/");
+    // the built-in markdown path completion fires on `/`, treats `@/` as a path,
+    // and throws with an empty workspace base — disable it to let snippets surface
+    expect(settings["markdown.suggest.paths.enabled"]).toBe(false);
   });
 });
 

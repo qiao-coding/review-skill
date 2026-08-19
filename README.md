@@ -269,11 +269,11 @@ guide: [docs/strip.md](docs/strip.md).
 
 Skill prose references other skills via `@/path` (e.g. `See @/react`). To get completion + hover preview while editing `.md` files, choose one of two paths:
 
-**Zero-install (default)** — `review-skill --init` writes a `.vscode/settings.json` that drops `@` and `/` from markdown word separators, so the snippet file the compiler generates (`.vscode/skills.code-snippets`) actually fires. Type `@/` in any markdown file → completion list of every skill path, no extension needed.
+**Zero-install (default)** — `review-skill --init` writes a `.vscode/settings.json` that (a) drops `@` and `/` from markdown word separators so `@/path` is a single word the generated `skills.code-snippets` can match, and (b) disables `markdown.suggest.paths` — the built-in path completion that fires on `/`, treats `@/` as a relative path, and throws with an empty workspace base. Type `@/` in any markdown file → completion list of every skill path, no extension needed.
 
 **vscode-review-skill extension (fuller UX)** — adds `@` as an automatic completion trigger plus hover preview of the referenced skill's content. VS Code only; run with F5 from `packages/vscode-review-skill` or package a `.vsix`.
 
-Why both exist: markdown treats `@` and `/` as word separators, so VS Code's built-in snippet matching can never trigger on `@/...` by default — the settings.json tweak makes the generated snippets match, and the extension bypasses the platform limitation entirely with a `@` trigger character.
+Why both exist: markdown treats `@` and `/` as word separators, so VS Code's built-in snippet matching can never trigger on `@/...` by default — the settings.json tweak makes the generated snippets match (at the cost of the built-in `[text](path)` link-path completion), and the extension bypasses the platform limitation entirely with a `@` trigger character without disabling anything.
 
 ## Links
 
