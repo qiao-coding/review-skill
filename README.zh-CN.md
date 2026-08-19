@@ -163,6 +163,8 @@ npx review-skill --init     # 初始化新项目
 
 ### strip —— token 优化
 
+源文件有两类受众：**工具元数据**（frontmatter、注释、格式）和 **agent 该读的指令**。编译总会切掉 frontmatter 块（变量契约、标题、描述），`strip` 负责剥掉其余工具层——运行时只有指令，没有说明。
+
 `skill.config.js` / `skill.config.mjs` 控制编译时清理哪些元素。`strip` 是**基于字符的 token 数组**：列出想剥离的精确 markdown 语法字面量（每个都有 TS 自动补全），省略即保留。**完全不配置 `strip` = 不剥离任何内容，原样返回文件**：
 
 ```js
