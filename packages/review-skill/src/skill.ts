@@ -23,6 +23,46 @@ function readRuntimePath(baseDir: string, path: string, isSkill: boolean): strin
     : join(baseDir, "runtime", path.replace(/^\//, ""));
 }
 
+/**
+ * Shared `@/path` reference pattern — single source for both the compiler
+ * (scanning/validation in variables.ts) and the runtime `inlineRefs`.
+ * Matches `@/path`, `@/path/to/resource.md`, and bare `@/` (root skill);
+ * `@`-without-slash (`@user`) is never a reference.
+ */
+export const SKILL_REF_PATTERN = "(?<!\\w)@\\/(?:[A-Za-z0-9_/-]+(?:\\.md)?)?";
+
+/** Read a compiled runtime file for any path; null when it doesn't exist. */
+function resolveRuntimeFile(baseDir: string, path: string): string | null {
+  const clean = path.replace(/^\//, "");
+  const skillPath = join(baseDir, "runtime", clean, "SKILL.md");
+  if (existsSync(skillPath)) return readFileSync(skillPath, "utf-8");
+  const resourcePath = join(baseDir, "runtime", clean);
+  if (existsSync(resourcePath)) return readFileSync(resourcePath, "utf-8");
+  return null;
+}
+
+/**
+ * Recursively inline `@/path` references into a single self-contained document.
+ * `resolve(path)` returns the referenced content (or null for unknown paths).
+ * `visited` guards against reference cycles — an already-open path is replaced
+ * with a `[cycle @/path]` marker instead of recursing forever.
+ */
+export function inlineRefs(
+  content: string,
+  resolve: (path: string) => string | null,
+  visited: ReadonlySet<string> = new Set()
+): string {
+  const re = new RegExp(SKILL_REF_PATTERN, "g");
+  return content.replace(re, (mention) => {
+    const path = mention.slice(1); // strip "@" → "/path"
+    if (visited.has(path)) return `[cycle ${mention}]`;
+    const nested = resolve(path);
+    if (nested == null) return mention; // unknown — leave as-is
+    const nextVisited = new Set(visited).add(path);
+    return `\n[${mention}]\n${inlineRefs(nested, resolve, nextVisited)}\n[/${mention}]\n`;
+  });
+}
+
 /** Create a SkillRef from metadata. Reads compiled content synchronously. */
 export function createSkill(
   path: string,
@@ -37,6 +77,9 @@ export function createSkill(
     content,
     async read(): Promise<string> {
       return content;
+    },
+    bundle(): string {
+      return inlineRefs(content, (p) => resolveRuntimeFile(baseDir, p));
     },
   };
 }

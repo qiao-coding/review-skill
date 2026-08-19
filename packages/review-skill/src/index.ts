@@ -1,4 +1,12 @@
-export { defineConfig, loadMetadata, createSkill, resolveSkill, skill, inject } from "./skill.js";
+export {
+  defineConfig,
+  loadMetadata,
+  createSkill,
+  resolveSkill,
+  skill,
+  inject,
+  inlineRefs,
+} from "./skill.js";
 export type {
   SkillPath,
   ResourcePath,

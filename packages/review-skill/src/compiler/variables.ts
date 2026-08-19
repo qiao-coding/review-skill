@@ -2,16 +2,16 @@ import { visit } from "unist-util-visit";
 import { parse as parseYaml } from "yaml";
 import type { Root } from "mdast";
 import type { VariableDecl } from "../types.js";
-import { TEMPLATE_VAR_PATTERN } from "../skill.js";
+import { TEMPLATE_VAR_PATTERN, SKILL_REF_PATTERN } from "../skill.js";
 import { msg } from "../i18n.js";
 
 // Anything left inside {{...}} after valid placeholders were removed is malformed.
 const MALFORMED_RE = /\{\{([^{}\n]*)\}\}/g;
 
-// `@/path` cross-skill reference in prose. Lookbehind avoids matching labels
-// like "user@/foo". `.md` is explicit (not a greedy `.`) so sentence
-// punctuation is not swallowed; `@/` alone addresses the root skill.
-const REF_RE = /(?<!\w)@\/(?:[A-Za-z0-9_/-]+(?:\.md)?)?/g;
+// `@/path` cross-skill reference in prose — same pattern the runtime uses to
+// inline bundles (SKILL_REF_PATTERN in skill.ts), so the compiler validates
+// exactly what `bundle()` resolves.
+const REF_RE = new RegExp(SKILL_REF_PATTERN, "g");
 
 export interface FrontmatterRange {
   start: number;
