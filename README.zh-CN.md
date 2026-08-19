@@ -229,7 +229,7 @@ agent.setSystemPrompt(guide.content);
 
 ## 配置
 
-`skill.config.js` 控制编译时清理哪些元素：
+`skill.config.js` 控制编译时清理哪些元素——`strip` 是**基于字符的 token 数组**：列出想剥离的精确 markdown 语法字面量（每个都有 TS 自动补全），省略即保留。**完全不配置 `strip` = 不剥离任何内容，原样返回文件**：
 
 ```js
 import { defineConfig } from "review-skill";
@@ -237,19 +237,43 @@ import { defineConfig } from "review-skill";
 export default defineConfig({
   skillsDir: "skills",
   outputDir: ".skill",
-  strip: {
-    comment: true,        // <!-- HTML comments -->
-    formatting: true,     // **bold** *italic* ~~strike~~
-    image: true,          // ![alt](url)
-    blockquote: true,     // > quotes
-    thematicBreak: true,  // --- horizontal rules
-    bullet: true,         // * - + list markers
-    whitespace: true,     // blank lines, trailing spaces
-  },
+  // 想保留的条目删掉；完全省略 strip 则原样返回：
+  strip: [
+    "<!-- HTML -->", // HTML 注释
+    "**bold**",       // 粗体
+    "*italic*",       // 斜体
+    "~~strikethrough~~",
+    "![alt](url)",    // 图片
+    "> quote",        // 引用块
+    "---",            // 分隔线
+    "- item",         // 列表符号
+    "\n\n",           // 空行折叠
+  ],
 });
 ```
 
-想保留某类格式时，把对应项设为 `false` 即可。
+可用 token（见 `STRIP_TOKENS`）：`"<!-- HTML -->"` HTML 注释 · `"**bold**"` 粗体 · `"*italic*"` 斜体 · `"~~strikethrough~~"` 删除线 · `"![alt](url)"` 图片 · `"> quote"` 引用块 · `"---"` 分隔线 · `"- item"` 列表符号 · `"\n\n"` 空行折叠。空数组 `strip: []` 不剥离任何内容。
+
+旧的对象形式（`strip: { formatting: false }`）仍可用但已弃用——编译器会提示等价的 token 数组。迁移指南：[docs/strip.md](docs/strip.md)。
+
+## 引用使用原生 markdown 链接
+
+Skill 的 prose 用**普通 markdown 链接**引用其他 skill——无需任何自定义语法：
+
+```markdown
+Follow the security constraints in [security](../security/SKILL.md) before drafting.
+See [state rules](../react/rules/state.md) for state management.
+```
+
+链接按**所在文件的相对位置**解析（在 `skills/` 目录结构下），编辑器侧完全由 VS Code 原生处理——输入即路径补全、Ctrl+点击跳转（含代码文件）、Ctrl+悬停预览、markdown 预览里渲染链接。无需扩展、无需配置、无需插件。
+
+编译器把这些链接当作引用契约：
+
+- **编译期校验**——目标解析不到已知 skill/resource 的链接会给出警告（`Unknown skill reference /path`）。
+- **`bundle()`**——把链接内容递归内联成单个自包含上下文（`[text](../path)` … `[/path]` 分段），循环用 `[cycle path]` 标记守护。
+- 外部 URL（`https://`）、锚点、`mailto:`、图片（`![alt](url)`）永远不会被当作引用。
+
+注意：引用式链接语法（`[x][id]` + `[id]: url`）暂不支持扫描——请使用内联 `[x](../path)` 形式。
 
 ## 链接
 
