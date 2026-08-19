@@ -1,6 +1,0 @@
-{
-  "markdown.suggest.paths.enabled": false,
-  "[markdown]": {
-    "editor.wordSeparators": "`~!#$%^&*()-=+[{]}\\|;:'\",.<>?"
-  }
-}
