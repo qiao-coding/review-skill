@@ -33,7 +33,7 @@
     "agent"
   ],
   "dependencies": {
-    "review-skill": "file:../review-skill"
+    "review-skill": "^0.4.0"
   },
   "peerDependencies": {
     "vite": ">=5.0.0"
