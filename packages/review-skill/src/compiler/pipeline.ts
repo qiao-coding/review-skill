@@ -23,6 +23,8 @@ export interface CompileOptions {
    *   consumer resolves links at runtime (e.g. picks an ending by game state).
    */
   merge?: "absorb" | "keep";
+  /** Called after each source file is compiled — lets the CLI log progress. */
+  onFile?: (relativePath: string) => void;
 }
 
 export interface CompileResult {
@@ -31,6 +33,8 @@ export interface CompileResult {
   sourceTokens: number;
   runtimeTokens: number;
   warnings: string[];
+  /** Link graph: canonical path → resolved link targets (the routing/dependency tree). */
+  deps: Array<{ path: string; refs: string[] }>;
 }
 
 export async function compile(
@@ -47,6 +51,7 @@ export async function compile(
   const errors: string[] = [];
   const previewLines = opts?.previewLines;
   const refsByFile: { relativePath: string; refs: string[] }[] = [];
+  const deps: { path: string; refs: string[] }[] = [];
 
   // Deprecated object-form strip → single migration warning (transformMarkdown re-normalizes per file).
   normalizeStrip(strip, warnings);
@@ -84,7 +89,10 @@ export async function compile(
       : "/" + file.relativePath;
     // Links resolve relative to the containing file — base is the canonical
     // *file* path (`/react/SKILL.md`), not the skill path (`/react`).
-    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast, "/" + file.relativePath) });
+    const fileRefs = scanSkillRefs(ast, "/" + file.relativePath);
+    refsByFile.push({ relativePath: file.relativePath, refs: fileRefs });
+    deps.push({ path: skillPath, refs: fileRefs });
+    opts?.onFile?.(file.relativePath);
 
     // Strip frontmatter at the source level before transform — transform.ts stays untouched.
     const fm = frontmatterRange(ast);
@@ -158,5 +166,5 @@ export async function compile(
   const sourceTokens = entries.reduce((s, e) => s + e.source.tokens, 0);
   const runtimeTokens = entries.reduce((s, e) => s + e.runtime.tokens, 0);
 
-  return { entries, outputDir, sourceTokens, runtimeTokens, warnings };
+  return { entries, outputDir, sourceTokens, runtimeTokens, warnings, deps };
 }

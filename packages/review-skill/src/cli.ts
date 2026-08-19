@@ -205,20 +205,54 @@ async function build() {
   const skillsDir = resolve(cwd, config.skillsDir ?? "skills");
   const outputDir = resolve(cwd, config.outputDir ?? ".skill");
 
+  // Code-build style output: spinner while compiling, one ✔ line per compiled
+  // file, then the skill dependency tree, then the summary.
+  const isTty = Boolean(process.stdout.isTTY);
+  const spinnerFrames = ["◐", "◓", "◑", "◒"];
+  let frame = 0;
+  const spinner = isTty
+    ? setInterval(() => {
+        process.stdout.write(`\r${spinnerFrames[frame++ % spinnerFrames.length]} ${msg("buildCompiling")}`);
+      }, 100)
+    : null;
+  const clearLine = () => {
+    if (isTty) process.stdout.write("\r[K");
+  };
+
   try {
     const start = Date.now();
     const result = await compile(skillsDir, outputDir, config.strip, lang, {
       previewLines: config.previewLines,
       merge: config.merge,
+      onFile: (relativePath) => {
+        clearLine();
+        console.log(`✔ ${relativePath}`);
+      },
     });
+    if (spinner) clearInterval(spinner);
+    clearLine();
 
     for (const w of result.warnings) {
       console.log(`⚠ ${w}`);
     }
 
+    // Skill dependency tree — who references what (the routing graph).
+    const withRefs = result.deps.filter((d) => d.refs.length);
+    if (withRefs.length) {
+      console.log(`\n${msg("buildDeps")}`);
+      for (const { path, refs } of withRefs) {
+        console.log(`  ${path}`);
+        for (let i = 0; i < refs.length; i++) {
+          console.log(`    ${i === refs.length - 1 ? "└─" : "├─"} ${refs[i]}`);
+        }
+      }
+    }
+
     const skills = result.entries.filter((e) => e.isSkill);
-    console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length));
+    console.log(`\n${msg("buildResult", result.entries.length, Date.now() - start, skills.length)}`);
   } catch (err) {
+    if (spinner) clearInterval(spinner);
+    clearLine();
     // Variable-contract violations and other compile errors → nonzero exit.
     console.error(msg("buildError", err instanceof Error ? err.message : String(err)));
     process.exitCode = 1;
