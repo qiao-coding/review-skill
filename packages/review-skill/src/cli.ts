@@ -121,6 +121,31 @@ if (isInit) {
     console.log(`✔ ${msg("initGitignore")}`);
   }
 
+  // Zero-install `@/path` completion in markdown: drop `@` and `/` from markdown
+  // word separators so VS Code snippet matching fires on `@/...` (no extension).
+  const vscodeDir = join(cwd, ".vscode");
+  const settingsPath = join(vscodeDir, "settings.json");
+  const markdownWordSeparators = "`~!#$%^&*()-=+[{]}\\|;:'\",.<>?";
+  if (existsSync(settingsPath)) {
+    try {
+      const settings: any = JSON.parse(await readFile(settingsPath, "utf-8"));
+      if (!settings["[markdown]"]?.["editor.wordSeparators"]) {
+        settings["[markdown]"] = settings["[markdown]"] ?? {};
+        settings["[markdown]"]["editor.wordSeparators"] = markdownWordSeparators;
+        await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+        console.log(`✔ ${msg("initWordSeparators")}`);
+      }
+    } catch {
+      // leave an unparsable user settings.json untouched
+    }
+  } else {
+    await mkdir(vscodeDir, { recursive: true });
+    await writeFile(settingsPath, JSON.stringify({
+      "[markdown]": { "editor.wordSeparators": markdownWordSeparators },
+    }, null, 2) + "\n", "utf-8");
+    console.log(`✔ ${msg("initWordSeparators")}`);
+  }
+
   // Inject tsconfig path alias (uses outputDir from config)
   const outDir = ".skill"; // default, matches init template
   const tsconfigPath = join(cwd, "tsconfig.json");

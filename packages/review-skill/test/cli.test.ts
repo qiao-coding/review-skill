@@ -74,6 +74,14 @@ describe.sequential("CLI --init", () => {
     const tsc = JSON.parse(readFileSync(join(root, "tsconfig.json"), "utf-8"));
     expect(tsc.compilerOptions.paths?.["@review-skill/skill"]).toContain("./.skill/skill.ts");
   });
+
+  it("adds .vscode/settings.json so @/ completion fires without an extension", () => {
+    const settings = JSON.parse(readFileSync(join(root, ".vscode", "settings.json"), "utf-8"));
+    const separators = settings["[markdown]"]["editor.wordSeparators"];
+    // @ and / must be word chars so `@/path` matches snippet prefixes in markdown
+    expect(separators).not.toContain("@");
+    expect(separators).not.toContain("/");
+  });
 });
 
 describe("CLI --help", () => {
