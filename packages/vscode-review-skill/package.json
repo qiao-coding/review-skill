@@ -5,6 +5,10 @@
   "version": "0.1.0",
   "private": true,
   "publisher": "qiao-coding",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qiao-coding/review-skill.git"
+  },
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
