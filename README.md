@@ -36,7 +36,7 @@ One source of truth (`.skill/`) feeds three layers:
 | Layer | Command / package | What you get |
 |---|---|---|
 | **Compiler** | `npx review-skill` | `skills/*.md` → token-optimized `.skill/` runtime; link references validated at build time; `--init` bootstraps a project with zero manual config |
-| **Runtime** | `@review-skill/skill` | Typed `skill("/path")` imports, hover metadata, token stats, `bundle()` for a single self-contained context, typed `inject()` templates |
+| **Runtime** | `@review-skill/skill` | Typed `skill("/path")` imports, hover metadata, token stats, self-contained merged content, typed `inject()` templates |
 | **Integration** | `@review-skill/vite` | Skills as first-class `@skill/*` virtual modules; the plugin compiles on demand |
 
 Other tools inject into AGENTS.md or generate standalone agents. review-skill is for TypeScript developers who want their skills tracked like code dependencies — the editor experience is native markdown links, at every layer.
@@ -118,7 +118,7 @@ VS Code handles the editor side natively — path completion as you type, Ctrl+c
 The compiler treats links as its reference contract:
 
 - **Build-time validation** — a link whose target doesn't resolve to a known skill/resource is reported as a warning (`Unknown skill reference /path`).
-- **`bundle()`** — recursively inlines the linked content into a single self-contained context (`[text](../path)` … `[/path]` sections; cycles guarded by `[cycle path]` markers).
+- **Compile-time merging** — the runtime output recursively absorbs linked content, so each skill is self-contained with no URL noise left for the agent. Cycles absorb to the link label.
 - External URLs (`https://`), anchors, `mailto:`, and images (`![alt](url)`) are never treated as references.
 
 > Note: reference-link syntax (`[x][id]` + `[id]: url`) is not yet scanned — use the inline `[x](../path)` form.
@@ -219,12 +219,9 @@ const markdown = rules.content;
 
 Hover a `skill()` call to see the skill's title, description, source file, current character/token count, estimated compiled size, and percentage saved.
 
-### bundle() — one self-contained context
+### Self-contained content
 
-```ts
-const review = skill("/react");
-const context = review.bundle(); // markdown links inlined recursively
-```
+Compilation already merges linked content into `.content`, so each skill's runtime is self-contained — no link URLs to chase. `bundle()` stays as an idempotent API for safety.
 
 ### inject() — typed templates
 

@@ -1,6 +1,6 @@
 {
   "name": "review-skill",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "TypeScript compiler for Markdown Agent Skills — typed references, token stats, zero plugins",
   "type": "module",
   "bin": {

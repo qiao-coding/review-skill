@@ -36,7 +36,7 @@ skills/                        ↓                           .skill/runtime/
 | 层 | 命令 / 包 | 你得到什么 |
 |---|---|---|
 | **编译器** | `npx review-skill` | `skills/*.md` → 省 token 的 `.skill/` 运行时；链接引用编译期校验；`--init` 零手动配置初始化项目 |
-| **运行时** | `@review-skill/skill` | 类型化 `skill("/path")` 导入、hover 元信息、token 统计、`bundle()` 单上下文、类型化 `inject()` 模板 |
+| **运行时** | `@review-skill/skill` | 类型化 `skill("/path")` 导入、hover 元信息、token 统计、自包含合并内容、类型化 `inject()` 模板 |
 | **集成** | `@review-skill/vite` | skill 变成一等公民的 `@skill/*` 虚拟模块；插件按需自动编译 |
 
 其他工具把 Markdown 注入 AGENTS.md 或生成独立 agent。review-skill 面向 TypeScript 开发者，把 skill 当成代码依赖来追踪——每一层的编辑器体验都是原生 markdown 链接。
@@ -118,7 +118,7 @@ Follow the security constraints in [security](../security/SKILL.md) before draft
 编译器把这些链接当作引用契约：
 
 - **编译期校验**——目标解析不到已知 skill/resource 的链接会给出警告（`Unknown skill reference /path`）。
-- **`bundle()`**——把链接内容递归内联成单个自包含上下文（`[text](../path)` … `[/path]` 分段，循环用 `[cycle path]` 标记守护）。
+- **编译期合并**——运行时输出递归吸收链接内容，每个 skill 自包含，不给 agent 留 URL 噪音。循环引用吸收为链接文字。
 - 外部 URL（`https://`）、锚点、`mailto:`、图片（`![alt](url)`）永远不会被当作引用。
 
 > 注意：引用式链接语法（`[x][id]` + `[id]: url`）暂不支持扫描——请使用内联 `[x](../path)` 形式。
@@ -219,12 +219,9 @@ const markdown = rules.content;
 
 悬停 `skill()` 调用，可以看到标题、描述、源文件、当前字符/token、预计编译后大小和节省比例。
 
-### bundle() —— 单个自包含上下文
+### 自包含内容
 
-```ts
-const review = skill("/react");
-const context = review.bundle(); // markdown 链接递归内联
-```
+编译时已把链接内容合并进 `.content`，每个 skill 的运行时都是自包含的——没有需要追的链接 URL。`bundle()` 保留为幂等 API 以防万一。
 
 ### inject() —— 类型化模板
 

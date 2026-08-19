@@ -166,9 +166,9 @@ describe("scanSkillRefs", () => {
   });
 
   it("resolves relative links against the containing file's path", () => {
-    // from /galgame/section-plan, ../security/SKILL.md → /security
-    const root = parseMarkdown("See [security](../security/SKILL.md).");
-    expect(scanSkillRefs(root, "/galgame/section-plan")).toEqual(["/security"]);
+    // from /galgame/section-plan/SKILL.md, ../../security/SKILL.md → /security
+    const root = parseMarkdown("See [security](../../security/SKILL.md).");
+    expect(scanSkillRefs(root, "/galgame/section-plan/SKILL.md")).toEqual(["/security"]);
   });
 });
 

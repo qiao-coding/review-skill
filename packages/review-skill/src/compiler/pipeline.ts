@@ -6,6 +6,7 @@ import { normalizeStrip, transformMarkdown } from "./transform.js";
 import { estimateTokens } from "./tokenize.js";
 import { emitRuntime, emitMetadata, emitTypesDts } from "./emit/index.js";
 import { frontmatterRange, validateVariables, scanSkillRefs } from "./variables.js";
+import { absorbLinks } from "../skill.js";
 import { msg } from "../i18n.js";
 import type { SkillMeta, StripOptions, Strip } from "../types.js";
 
@@ -71,7 +72,9 @@ export async function compile(
           ? "/"
           : "/" + file.relativePath.replace(/\/?SKILL\.md$/, ""))
       : "/" + file.relativePath;
-    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast, skillPath) });
+    // Links resolve relative to the containing file — base is the canonical
+    // *file* path (`/react/SKILL.md`), not the skill path (`/react`).
+    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast, "/" + file.relativePath) });
 
     // Strip frontmatter at the source level before transform — transform.ts stays untouched.
     const fm = frontmatterRange(ast);
@@ -101,7 +104,6 @@ export async function compile(
 
     entries.push(entry);
     contentMap.set(skillPath, runtimeContent);
-    await emitRuntime(skillPath, runtimeContent, outputDir);
   }
 
   if (errors.length > 0) {
@@ -118,8 +120,21 @@ export async function compile(
     }
   }
 
+  // Compile-time link merging — each runtime output is self-contained: links to
+  // other skills/resources are recursively absorbed (no URL noise for the agent).
+  // Resolve relative to the containing file (a skill's file is `<path>/SKILL.md`).
+  const mergedContent = new Map<string, string>();
+  for (const entry of entries) {
+    const raw = contentMap.get(entry.path) ?? "";
+    const filePath = entry.isSkill ? `${entry.path}/SKILL.md` : entry.path;
+    const content = absorbLinks(raw, filePath, (p) => contentMap.get(p) ?? null);
+    mergedContent.set(entry.path, content);
+    entry.runtime = { characters: content.length, tokens: estimateTokens(content.length) };
+    await emitRuntime(entry.path, content, outputDir);
+  }
+
   await emitMetadata(entries, outputDir);
-  await emitTypesDts(entries, outputDir, lang, { contentMap, previewLines });
+  await emitTypesDts(entries, outputDir, lang, { contentMap: mergedContent, previewLines });
 
   const sourceTokens = entries.reduce((s, e) => s + e.source.tokens, 0);
   const runtimeTokens = entries.reduce((s, e) => s + e.runtime.tokens, 0);

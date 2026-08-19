@@ -120,6 +120,23 @@ describe("skill() runtime", () => {
     const content = await ref.read();
     expect(content).toContain("# State Rules");
   });
+
+  it("merges linked skill content into the runtime output", async () => {
+    const mergeRoot = join(root, "merge");
+    const mergeSkills = join(mergeRoot, "skills");
+    const mergeOut = join(mergeRoot, ".skill");
+    mkdirSync(join(mergeSkills, "rules"), { recursive: true });
+    writeFileSync(join(mergeSkills, "SKILL.md"), "# Root\n\nSee [state rules](../rules/state.md) for details.\n", "utf-8");
+    writeFileSync(join(mergeSkills, "rules", "state.md"), "# State Rules\n\nKeep it pure.\n", "utf-8");
+
+    const result = await compile(mergeSkills, mergeOut);
+    expect(result.warnings.length).toBe(0);
+    const runtime = readFileSync(join(mergeOut, "runtime", "SKILL.md"), "utf-8");
+    // the referenced file's content is inlined and the link URL is gone
+    expect(runtime).toContain("Keep it pure.");
+    expect(runtime).not.toContain("../rules/state.md");
+    expect(runtime).not.toContain("[state rules]");
+  });
 });
 
 describe("pipeline variables contract", () => {

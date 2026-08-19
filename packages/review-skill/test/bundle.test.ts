@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { inlineRefs, createSkill } from "../src/skill.js";
+import { inlineRefs, absorbLinks, createSkill } from "../src/skill.js";
 import type { SkillMeta } from "../src/types.js";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -62,10 +62,10 @@ describe("inlineRefs", () => {
   });
 
   it("resolves a link relative to a nested file's directory", () => {
-    // from /galgame/section-plan, ../security/SKILL.md → /security
+    // from /galgame/section-plan/SKILL.md, ../../security/SKILL.md → /security
     const out = inlineRefs(
-      "See [security](../security/SKILL.md).",
-      "/galgame/section-plan",
+      "See [security](../../security/SKILL.md).",
+      "/galgame/section-plan/SKILL.md",
       (p) => (p === "/security" ? "# SECURITY\n\nRules.\n" : null)
     );
     expect(out).toContain("[/security]");
@@ -75,6 +75,53 @@ describe("inlineRefs", () => {
   it("does not treat image links as references", () => {
     const out = inlineRefs("![diagram](../diagram.png)", "/", resolve);
     expect(out).toBe("![diagram](../diagram.png)");
+  });
+});
+
+describe("absorbLinks", () => {
+  it("absorbs the referenced content in place — no markers, no URL", () => {
+    const docs: Record<string, string> = {
+      "/a": "# A\n\nSee [c](../c).\n",
+      "/c": "# C\n\nLeaf.\n",
+    };
+    const out = absorbLinks(docs["/a"], "/a/SKILL.md", (p) => docs[p] ?? null);
+    expect(out).toContain("# C");
+    expect(out).toContain("Leaf.");
+    expect(out).not.toContain("[c](../c)");
+    expect(out).not.toContain("../c");
+  });
+
+  it("recurses through nested links", () => {
+    const docs: Record<string, string> = {
+      "/a": "# A\n\nSee [b](../b).\n",
+      "/b": "# B\n\nSee [c](../c).\n",
+      "/c": "# C\n\nLeaf.\n",
+    };
+    const out = absorbLinks(docs["/a"], "/a/SKILL.md", (p) => docs[p] ?? null);
+    expect(out).toContain("# B");
+    expect(out).toContain("# C");
+    expect(out).toContain("Leaf.");
+  });
+
+  it("absorbs a cycle to the link label", () => {
+    const cyc: Record<string, string> = {
+      "/a": "# A\n\nSee [b](../b).\n",
+      "/b": "# B\n\nSee [a](../a).\n",
+    };
+    const out = absorbLinks(cyc["/a"], "/a/SKILL.md", (p) => cyc[p] ?? null);
+    expect(out).toContain("# B");
+    expect(out).not.toContain("[a](../a)");
+    expect(out).not.toContain("[b](../b)");
+  });
+
+  it("keeps external links and unknown refs untouched", () => {
+    const out = absorbLinks(
+      "See [site](https://example.com) and [x](../nope).",
+      "/a/SKILL.md",
+      (p) => (p === "/a" ? "# A\n" : null)
+    );
+    expect(out).toContain("[site](https://example.com)");
+    expect(out).toContain("[x](../nope)");
   });
 });
 

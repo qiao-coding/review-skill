@@ -70,8 +70,8 @@ function resolveRuntimeFile(baseDir: string, path: string): string | null {
   return null;
 }
 
-/** `[text](url)` / `[text](url "title")` — negative lookbehind excludes `![img](url)`. */
-const LINK_RE_SOURCE = "(?<!\\!)\\[[^\\]\\n]*\\]\\(([^)\\s]+)(?:\\s+[\"'][^)]*)?\\)";
+/** `[text](url)` / `[text](url "title")` — group 1 label, group 2 url; negative lookbehind excludes `![img](url)`. */
+const LINK_RE_SOURCE = "(?<!\\!)\\[([^\\]\\n]*)\\]\\(([^)\\s]+)(?:\\s+[\"'][^)]*)?\\)";
 
 /**
  * Recursively inline markdown-link references into a single self-contained
@@ -89,7 +89,7 @@ export function inlineRefs(
   visited: ReadonlySet<string> = new Set()
 ): string {
   const re = new RegExp(LINK_RE_SOURCE, "g");
-  return content.replace(re, (link, url) => {
+  return content.replace(re, (link, _label, url) => {
     const path = resolveSkillLink(url, currentPath);
     if (path == null) return link; // external/anchor — leave as-is
     if (visited.has(path)) return `[cycle ${path}]`;
@@ -97,6 +97,31 @@ export function inlineRefs(
     if (nested == null) return link; // unknown — leave as-is
     const nextVisited = new Set(visited).add(path);
     return `\n${link}\n${inlineRefs(nested, path, resolve, nextVisited)}\n[/${path.replace(/^\//, "")}]\n`;
+  });
+}
+
+/**
+ * Compile-time link absorption: replace each `[text](../path)` with the fully
+ * inlined content of the referenced file (recursively), so the runtime output
+ * is self-contained — no URL noise left for the agent. Cycles absorb to the
+ * link label; unknown refs stay as-is (the build already warned). `resolve(path)`
+ * returns the target's content (null for unknown).
+ */
+export function absorbLinks(
+  content: string,
+  currentPath: string,
+  resolve: (path: string) => string | null,
+  visiting: ReadonlySet<string> = new Set()
+): string {
+  const re = new RegExp(LINK_RE_SOURCE, "g");
+  return content.replace(re, (link, label, url) => {
+    const path = resolveSkillLink(url, currentPath);
+    if (path == null) return link; // external/anchor — keep
+    if (visiting.has(path)) return label; // cycle — absorb to plain text
+    const nested = resolve(path);
+    if (nested == null) return link; // unknown — keep (warned at build)
+    const nextVisiting = new Set(visiting).add(path);
+    return absorbLinks(nested, path, resolve, nextVisiting);
   });
 }
 
@@ -108,6 +133,9 @@ export function createSkill(
 ): SkillRef {
   const filePath = readRuntimePath(baseDir, path, meta.isSkill);
   const content = readFileSync(filePath, "utf-8");
+  // Relative links resolve against the containing file, so the base is the
+  // canonical *file* path (a skill's file is `<path>/SKILL.md`), not the skill path.
+  const linkBase = meta.isSkill ? `${path}/SKILL.md` : path;
 
   return {
     meta,
@@ -116,7 +144,7 @@ export function createSkill(
       return content;
     },
     bundle(): string {
-      return inlineRefs(content, path, (p) => resolveRuntimeFile(baseDir, p));
+      return inlineRefs(content, linkBase, (p) => resolveRuntimeFile(baseDir, p));
     },
   };
 }
