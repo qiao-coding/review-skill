@@ -13,6 +13,7 @@ TypeScript-first Skill 框架 — 用 Markdown 编写 skill，编译一次，以
 - [快速开始](#快速开始)
 - [不同 Agent 框架如何接入](#不同-agent-框架如何接入)
 - [配置](#配置)
+- [模板与 inject()](#模板与-inject)
 
 `review-skill` 帮开发者把 Agent 指令当成工程资产来管理。你用 Markdown 编写可复用 Skill，编译一次，然后在 TypeScript 中通过生成的 `@review-skill/skill` 路径别名安全引用。
 
@@ -282,6 +283,47 @@ See [state rules](../react/rules/state.md) for state management.
 - 外部 URL（`https://`）、锚点、`mailto:`、图片（`![alt](url)`）永远不会被当作引用。
 
 注意：引用式链接语法（`[x][id]` + `[id]: url`）暂不支持扫描——请使用内联 `[x](../path)` 形式。
+
+## 模板与 inject()
+
+Skill 可以是模板。在 YAML frontmatter 里声明 `variables` 契约，prose 里用 `{{占位符}}`，消费时用类型化的 `inject()` 填充。
+
+```markdown
+---
+variables:
+  - name: sceneTitle
+  - name: isFinale
+    required: false
+---
+# Scene Plan
+
+You are writing {{sceneTitle}}. Finale: {{isFinale}}.
+```
+
+- `required` 默认 `true`；可选变量设 `required: false`。
+- 编译器在构建时强制契约：未声明的 `{{var}}` → **报错**；required 变量声明未用 → 报错；可选变量声明未用 → 警告；畸形占位符（`{{a-b}}`）→ 报错。没有 frontmatter 契约却用了任何 `{{var}}` → 报错。
+
+消费编译后的模板：
+
+```ts
+import { skill, inject } from "@review-skill/skill";
+
+const template = skill("/galgame/section-plan").content;
+const scene = inject(template, { sceneTitle: "Act 2", isFinale: "yes" });
+// 缺失的 key 替换为 "" ——「无此块」约定
+```
+
+声明了 `variables` 的 skill，编译器会在 `.skill/skill.ts` 里生成 per-skill 接口（`/galgame/section-plan` → `GalgameSectionplanVars`），缺 required key 编译期就报错：
+
+```ts
+import { skill, inject, type GalgameSectionplanVars } from "@review-skill/skill";
+
+const scene = inject<GalgameSectionplanVars>(template, {
+  sceneTitle: "Act 2",
+  // isFinale 可选 —— 可以省略
+});
+// 省略 sceneTitle → TS 报错: property 'sceneTitle' is missing
+```
 
 ## 链接
 

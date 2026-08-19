@@ -13,6 +13,7 @@ Language: English | [简体中文](README.zh-CN.md)
 - [Quick start](#quick-start)
 - [Agent framework integrations](#agent-framework-integrations)
 - [Configuration](#configuration)
+- [Templates and inject()](#templates-and-inject)
 
 `review-skill` helps developers manage agent instructions like application assets. Write reusable skills in Markdown, compile them once, and consume them from TypeScript through the generated `@review-skill/skill` path alias.
 
@@ -291,6 +292,47 @@ The compiler treats these links as its reference contract:
 - External URLs (`https://`), anchors, `mailto:`, and images (`![alt](url)`) are never treated as references.
 
 Note: reference-link syntax (`[x][id]` + `[id]: url`) is not yet scanned — use the inline `[x](../path)` form.
+
+## Templates and inject()
+
+Skills can be templates. Declare a `variables` contract in the YAML frontmatter, use `{{placeholders}}` in prose, and fill them in at consumption time with typed `inject()`.
+
+```markdown
+---
+variables:
+  - name: sceneTitle
+  - name: isFinale
+    required: false
+---
+# Scene Plan
+
+You are writing {{sceneTitle}}. Finale: {{isFinale}}.
+```
+
+- `required` defaults to `true`; set `required: false` for optional variables.
+- The compiler enforces the contract at build time: an undeclared `{{var}}` → **error**, a required variable never used → error, an optional one never used → warning, a malformed placeholder (`{{a-b}}`) → error. Using any `{{var}}` without a frontmatter contract → error.
+
+Consume the compiled template:
+
+```ts
+import { skill, inject } from "@review-skill/skill";
+
+const template = skill("/galgame/section-plan").content;
+const scene = inject(template, { sceneTitle: "Act 2", isFinale: "yes" });
+// missing keys are replaced with "" — the "no such block" convention
+```
+
+When a skill declares `variables`, the compiler generates a per-skill interface (`/galgame/section-plan` → `GalgameSectionplanVars`) in `.skill/skill.ts`, so missing required keys fail at compile time:
+
+```ts
+import { skill, inject, type GalgameSectionplanVars } from "@review-skill/skill";
+
+const scene = inject<GalgameSectionplanVars>(template, {
+  sceneTitle: "Act 2",
+  // isFinale is optional — omit it
+});
+// omitting sceneTitle → TS error: property 'sceneTitle' is missing
+```
 
 ## Links
 
