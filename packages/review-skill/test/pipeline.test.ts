@@ -188,4 +188,21 @@ describe("pipeline variables contract", () => {
     const result = await compile(varSkills, varOut);
     expect(result.warnings.some((w) => w.includes("optional"))).toBe(true);
   });
+
+  it("validates @/path references against known skill paths", async () => {
+    writeSkill([
+      "---",
+      "variables:",
+      "  - name: known",
+      "---",
+      "",
+      "See @/galgame/section-plan (known) and @/missing-skill (unknown). Use {{known}}.",
+    ].join("\n"));
+    mkdirSync(join(varSkills, "galgame", "section-plan"), { recursive: true });
+    writeFileSync(join(varSkills, "galgame", "section-plan", "SKILL.md"), "# Section Plan\n\nContent.\n", "utf-8");
+
+    const result = await compile(varSkills, varOut);
+    expect(result.warnings.some((w) => w.includes("@/missing-skill"))).toBe(true);
+    expect(result.warnings.some((w) => w.includes("@/galgame/section-plan"))).toBe(false);
+  });
 });

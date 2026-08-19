@@ -3,3 +3,5 @@ dist/
 *.tsbuildinfo
 .skill/
 juejin-article.md
+# Generated @ completion (regenerated on every build)
+**/.vscode/skills.code-snippets

@@ -8,6 +8,11 @@ import { msg } from "../i18n.js";
 // Anything left inside {{...}} after valid placeholders were removed is malformed.
 const MALFORMED_RE = /\{\{([^{}\n]*)\}\}/g;
 
+// `@/path` cross-skill reference in prose. Lookbehind avoids matching labels
+// like "user@/foo". `.md` is explicit (not a greedy `.`) so sentence
+// punctuation is not swallowed; `@/` alone addresses the root skill.
+const REF_RE = /(?<!\w)@\/(?:[A-Za-z0-9_/-]+(?:\.md)?)?/g;
+
 export interface FrontmatterRange {
   start: number;
   end: number;
@@ -53,6 +58,21 @@ export function scanTemplateVariables(root: Root): { used: string[]; malformed: 
   });
 
   return { used: [...used], malformed: [...malformed] };
+}
+
+/**
+ * Collect `@/path` cross-skill references from prose (e.g. `@/galgame/section-plan`).
+ * Code blocks / inline code / HTML are excluded automatically, same as
+ * `scanTemplateVariables`. The `@` must be directly followed by `/`, so bare
+ * `@user` mentions are never treated as skill references.
+ */
+export function scanSkillRefs(root: Root): string[] {
+  const refs = new Set<string>();
+  const re = new RegExp(REF_RE.source, "g");
+  visit(root, "text", (node) => {
+    for (const m of ((node as any).value as string).matchAll(re)) refs.add(m[0]);
+  });
+  return [...refs];
 }
 
 /** Parse the `variables` contract from a YAML frontmatter node. */

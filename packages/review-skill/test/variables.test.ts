@@ -3,6 +3,7 @@ import { parseMarkdown } from "../src/compiler/parse.js";
 import {
   frontmatterRange,
   parseVariableContract,
+  scanSkillRefs,
   scanTemplateVariables,
   validateVariables,
 } from "../src/compiler/variables.js";
@@ -135,6 +136,31 @@ describe("validateVariables", () => {
     const { errors, warnings } = validateVariables(root);
     expect(errors).toEqual([]);
     expect(warnings).toEqual([]);
+  });
+});
+
+describe("scanSkillRefs", () => {
+  it("collects @/path references from prose", () => {
+    const root = parseMarkdown("See @/galgame/section-plan and @/review/rules/state.md.");
+    expect(scanSkillRefs(root)).toEqual(["@/galgame/section-plan", "@/review/rules/state.md"]);
+  });
+
+  it("ignores bare @mentions without a leading slash", () => {
+    const root = parseMarkdown("Mention @user and @todo, but not @foo/bar either.");
+    expect(scanSkillRefs(root)).toEqual([]);
+  });
+
+  it("ignores references inside code blocks and inline code", () => {
+    const root = parseMarkdown(
+      [
+        "Real ref: @/galgame/section-plan.",
+        "```ts",
+        "const p = '@/hidden/path';",
+        "```",
+        "Inline `@/also-hidden` too.",
+      ].join("\n")
+    );
+    expect(scanSkillRefs(root)).toEqual(["@/galgame/section-plan"]);
   });
 });
 

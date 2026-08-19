@@ -4,6 +4,7 @@
  */
 
 import { compile } from "./compiler/pipeline.js";
+import { emitSnippets } from "./compiler/emit/index.js";
 import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import { join, resolve } from "node:path";
@@ -184,6 +185,9 @@ async function build() {
     for (const w of result.warnings) {
       console.log(`⚠ ${w}`);
     }
+
+    // Zero-install `@` completion: regenerate .vscode/skills.code-snippets from metadata.
+    await emitSnippets(result.entries, join(cwd, ".vscode"));
 
     const skills = result.entries.filter((e) => e.isSkill);
     const reduction = result.sourceTokens - result.runtimeTokens;

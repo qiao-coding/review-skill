@@ -5,7 +5,8 @@ import { analyze } from "./analyze.js";
 import { transformMarkdown } from "./transform.js";
 import { estimateTokens } from "./tokenize.js";
 import { emitRuntime, emitMetadata, emitTypesDts } from "./emit/index.js";
-import { frontmatterRange, validateVariables } from "./variables.js";
+import { frontmatterRange, validateVariables, scanSkillRefs } from "./variables.js";
+import { msg } from "../i18n.js";
 import type { SkillMeta, StripOptions } from "../types.js";
 
 export interface CompileOptions {
@@ -34,6 +35,7 @@ export async function compile(
   const warnings: string[] = [];
   const errors: string[] = [];
   const previewLines = opts?.previewLines;
+  const refsByFile: { relativePath: string; refs: string[] }[] = [];
 
   // Group by skill to count files
   const skillFileCount = new Map<string, number>();
@@ -59,6 +61,9 @@ export async function compile(
     const { variables, warnings: varWarnings, errors: varErrors } = validateVariables(ast);
     for (const e of varErrors) errors.push(`${file.relativePath}: ${e}`);
     for (const w of varWarnings) warnings.push(`${file.relativePath}: ${w}`);
+
+    // L2 `@/path` references — collected now, validated against all paths after the loop.
+    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast) });
 
     // Strip frontmatter at the source level before transform — transform.ts stays untouched.
     const fm = frontmatterRange(ast);
@@ -99,6 +104,16 @@ export async function compile(
 
   if (errors.length > 0) {
     throw new Error(errors.join("\n"));
+  }
+
+  // L2 — every `@/path` reference must resolve to a known skill/resource path.
+  const knownPaths = new Set(entries.map((e) => e.path));
+  for (const { relativePath, refs } of refsByFile) {
+    for (const ref of refs) {
+      if (!knownPaths.has(ref.slice(1))) {
+        warnings.push(`${relativePath}: ${msg("warnUnknownRef", ref)}`);
+      }
+    }
   }
 
   await emitMetadata(entries, outputDir);
