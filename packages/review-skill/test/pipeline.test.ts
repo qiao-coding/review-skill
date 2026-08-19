@@ -137,6 +137,18 @@ describe("skill() runtime", () => {
     expect(runtime).not.toContain("../rules/state.md");
     expect(runtime).not.toContain("[state rules]");
   });
+
+  it("does not warn for links to existing non-markdown assets", async () => {
+    const assetRoot = join(root, "asset");
+    const assetSkills = join(assetRoot, "skills");
+    const assetOut = join(assetRoot, ".skill");
+    mkdirSync(join(assetSkills, "schemas"), { recursive: true });
+    writeFileSync(join(assetSkills, "SKILL.md"), "# Root\n\nUse [schema](../schemas/chapter-plan.schema) here.\n", "utf-8");
+    writeFileSync(join(assetSkills, "schemas", "chapter-plan.schema"), '{ "type": "object" }\n', "utf-8");
+
+    const result = await compile(assetSkills, assetOut);
+    expect(result.warnings.length).toBe(0);
+  });
 });
 
 describe("pipeline variables contract", () => {

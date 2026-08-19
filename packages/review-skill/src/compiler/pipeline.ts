@@ -1,4 +1,6 @@
 import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { discover } from "./discover.js";
 import { parseMarkdown } from "./parse.js";
 import { analyze } from "./analyze.js";
@@ -111,10 +113,15 @@ export async function compile(
   }
 
   // L2 — every link reference must resolve to a known skill/resource path.
+  // Non-markdown assets (schemas, JSON, images…) are valid references too:
+  // they exist as source files and the editor opens them, but they aren't
+  // compiled — so an existing source file suppresses the unknown-ref warning.
   const knownPaths = new Set(entries.map((e) => e.path));
+  const existsAsSource = (ref: string) =>
+    existsSync(join(skillsDir, ref.replace(/^\//, "")));
   for (const { relativePath, refs } of refsByFile) {
     for (const ref of refs) {
-      if (!knownPaths.has(ref)) {
+      if (!knownPaths.has(ref) && !existsAsSource(ref)) {
         warnings.push(`${relativePath}: ${msg("warnUnknownRef", ref)}`);
       }
     }
