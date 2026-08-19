@@ -6,6 +6,8 @@
  * surface for `@/`). Data comes from `.skill/metadata.json` + `.skill/runtime/`.
  */
 import * as vscode from "vscode";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { loadSkills, resolveRuntimeFile, previewLines, mentionStart, MENTION_RE } from "./core";
 
 function workspaceRoot(): string {
@@ -36,6 +38,22 @@ export function activate(context: vscode.ExtensionContext) {
   refreshStatus();
   // Re-read when the workspace root changes (e.g. a folder is opened after launch).
   context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(refreshStatus));
+
+  // Diagnostic: run "Review Skill Tip: Check status" from the command palette to
+  // see the workspace root, whether metadata.json exists, and the skill count.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("review-skill-tip.check", () => {
+      const root = workspaceRoot();
+      const metaExists = root !== "" && existsSync(join(root, ".skill", "metadata.json"));
+      const skills = loadSkills(root);
+      const detail = skills.length ? `\n  ${skills.map((s) => s.path).join("\n  ")}` : "";
+      void vscode.window.showInformationMessage(
+        `[review-skill-tip] workspace root: "${root || "(none open)"}"\n` +
+          `metadata.json: ${metaExists ? "✓" : "✗ (run npx review-skill)"}\n` +
+          `${skills.length} skills${detail}`
+      );
+    })
+  );
 
   // ── Completion: type `@` → list every compiled skill/resource ──
   // Load per request so skills reflect the current workspace root even if the

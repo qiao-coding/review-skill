@@ -16,7 +16,14 @@
   "categories": ["Other"],
   "activationEvents": ["onLanguage:markdown"],
   "main": "./out/extension.js",
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "review-skill-tip.check",
+        "title": "Review Skill Tip: Check status"
+      }
+    ]
+  },
   "scripts": {
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
