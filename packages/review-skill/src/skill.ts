@@ -64,3 +64,26 @@ const _meta = loadMetadata(".skill");
 export function skill(path: string): SkillRef {
   return resolveSkill(path, _meta, ".skill");
 }
+
+/**
+ * Shared template placeholder pattern — must stay in sync between the compiler
+ * (variable scanning/validation) and the runtime `inject`.
+ * A single source avoids the "scan strips X but inject leaves it" drift.
+ */
+export const TEMPLATE_VAR_PATTERN = "\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}";
+
+/**
+ * Pure variable substitution: replaces `{{name}}` with the value from `vars`.
+ * Missing keys become `""` (the "empty string = no such block" convention).
+ * No template control flow — the caller decides what to inject.
+ *
+ * Typed usage: `inject<SectionPlanVars>(template, vars)` forces the object
+ * literal to satisfy the generated per-skill interface at compile time
+ * (missing required keys → TS2345).
+ */
+export function inject<V extends object>(template: string, vars: V): string {
+  return template.replace(new RegExp(TEMPLATE_VAR_PATTERN, "g"), (_m, name) => {
+    const value = (vars as Record<string, unknown>)[name as string];
+    return value == null ? "" : String(value);
+  });
+}

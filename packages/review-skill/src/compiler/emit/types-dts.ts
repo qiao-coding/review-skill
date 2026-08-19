@@ -1,6 +1,6 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { SkillMeta } from "../../types.js";
+import type { SkillMeta, VariableDecl } from "../../types.js";
 
 const LABELS: Record<string, Record<string, string>> = {
   en: {
@@ -9,6 +9,7 @@ const LABELS: Record<string, Record<string, string>> = {
     files: "Files",
     characters: "Chars",
     tokens: "Tokens",
+    previewTitle: "Content preview",
   },
   "zh-CN": {
     sourceTitle: "── 当前文件 ──",
@@ -16,20 +17,56 @@ const LABELS: Record<string, Record<string, string>> = {
     files: "文件数",
     characters: "字符数",
     tokens: "Token",
+    previewTitle: "内容预览",
   },
 };
 
+export interface EmitTypesDtsOptions {
+  /** skillPath → compiled runtime content — drives the hover preview block. */
+  contentMap?: Map<string, string>;
+  /** Max runtime lines embedded per JSDoc preview. Default 3. */
+  previewLines?: number;
+}
+
+/** "/galgame/section-plan" → "GalgameSectionPlanVars"; "/" → "RootVars". */
+function pathToVarsType(path: string, used: Set<string>): string {
+  const segs = path
+    .replace(/\.md$/, "")
+    .split("/")
+    .filter(Boolean)
+    .map((seg) => {
+      const cleaned = seg.replace(/[^A-Za-z0-9_]/g, "");
+      return cleaned ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : "";
+    })
+    .filter(Boolean);
+  let base = segs.length > 0 ? `${segs.join("")}Vars` : "RootVars";
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(base)) {
+    // Non-ASCII / odd paths → deterministic hash-based name.
+    let h = 0;
+    for (const ch of path) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    base = `SkillVars_${h.toString(36)}`;
+  }
+  while (used.has(base)) base += "2";
+  used.add(base);
+  return base;
+}
+
+function varsFields(vars: VariableDecl[]): string {
+  return vars.map((v) => `  ${v.name}${v.required ? "" : "?"}: string;`).join("\n");
+}
+
 /**
  * Generate `.skill/skill.ts` — a wrapper module that adds typed overloads
- * to skill() with JSDoc hover info.
+ * to skill() with JSDoc hover info, per-skill variable interfaces,
+ * and a re-export of the runtime `inject`.
  */
 export async function emitTypesDts(
   entries: SkillMeta[],
   outputDir: string,
-  lang: string = "en"
+  lang: string = "en",
+  opts?: EmitTypesDtsOptions
 ): Promise<void> {
   const L = LABELS[lang] ?? LABELS.en;
-  const labelW = 10;
   const skills = entries.filter((e) => e.isSkill);
   const resources = entries.filter((e) => !e.isSkill);
 
@@ -47,12 +84,26 @@ export async function emitTypesDts(
     });
   }
 
+  function buildPreview(content: string, n: number): string[] {
+    const contentLines = content.split("\n");
+    const total = content.endsWith("\n") ? contentLines.length - 1 : contentLines.length;
+    const shown = contentLines.slice(0, n).map((l) => l.replace(/\*\//g, "*\\/"));
+    const zh = lang === "zh-CN";
+    const out: string[] = [" *"];
+    out.push(
+      zh
+        ? ` * ── ${L.previewTitle}（前 ${shown.length} 行）──`
+        : ` * ── ${L.previewTitle} (first ${shown.length}) ──`
+    );
+    for (const l of shown) out.push(` * ${l}`);
+    if (total > shown.length) {
+      out.push(zh ? ` * …（共 ${total} 行）` : ` * … (${total} lines total)`);
+    }
+    return out;
+  }
+
   function jsDoc(entry: SkillMeta): string {
     const kind = entry.isSkill ? "Skill" : "Resource";
-
-    function pad(label: string, n: number): string {
-      return label.padEnd(n);
-    }
 
     const sourceFile = entry.isSkill
       ? `skills/${entry.path === "/" ? "" : entry.path.replace(/^\//, "")}/SKILL.md`.replace(/\/$/, "/SKILL.md").replace(/\/\//g, "/")
@@ -87,6 +138,13 @@ export async function emitTypesDts(
     lines.push(` * **${srcTitle}** | ${L.characters} \`${sc.toLocaleString()}\` | ${L.tokens} \`~${sr.toLocaleString()}\`  `);
     lines.push(` *`);
     lines.push(` * **${rtTitle}** | ${L.characters} \`${rc.toLocaleString()}\` (\`${cs}%\`) | ${L.tokens} \`~${rt.toLocaleString()}\` (\`${ts}%\`)`);
+
+    // L4 — hover content preview from the compiled runtime.
+    const preview = opts?.contentMap?.get(entry.path);
+    if (preview && preview.trim()) {
+      lines.push(...buildPreview(preview, opts?.previewLines ?? 3));
+    }
+
     lines.push(" */");
     return lines.join("\n");
   }
@@ -98,6 +156,8 @@ export async function emitTypesDts(
     "",
     'import { skill as _skill, loadMetadata } from "review-skill";',
     'export type { SkillRef, SkillMeta, SkillStats } from "review-skill";',
+    'export { inject } from "review-skill";',
+    'export type { VariableDecl } from "review-skill";',
     "",
     'const _meta = loadMetadata(".skill");',
     "",
@@ -110,6 +170,18 @@ export async function emitTypesDts(
     "export type SkillAddress = SkillPath | ResourcePath;",
     "",
   ];
+
+  // Per-skill variable interfaces, generated from each frontmatter contract.
+  const usedTypeNames = new Set<string>();
+  for (const entry of sorted) {
+    if (!entry.variables?.length) continue;
+    const name = pathToVarsType(entry.path, usedTypeNames);
+    lines.push(`/** Variables for ${JSON.stringify(entry.path)} */`);
+    lines.push(`export interface ${name} {`);
+    lines.push(varsFields(entry.variables));
+    lines.push(`}`);
+    lines.push("");
+  }
 
   for (const entry of sorted) {
     lines.push(jsDoc(entry));

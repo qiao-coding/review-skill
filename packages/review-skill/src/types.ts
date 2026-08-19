@@ -7,6 +7,13 @@ export interface SkillStats {
   tokens: number;
 }
 
+/** A variable declared in a skill's frontmatter contract. */
+export interface VariableDecl {
+  name: string;
+  required: boolean;
+  hint?: string;
+}
+
 export interface SkillMeta {
   path: string;
   title: string;
@@ -15,6 +22,8 @@ export interface SkillMeta {
   source: SkillStats;
   runtime: SkillStats;
   files?: number;
+  /** Variables declared in frontmatter (L1 variable contract). */
+  variables?: VariableDecl[];
 }
 
 /**

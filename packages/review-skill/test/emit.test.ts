@@ -135,3 +135,67 @@ describe("emitTypesDts", () => {
     expect(content).toContain('skill(path: "/"):');
   });
 });
+
+describe("emitTypesDts variables & preview", () => {
+  const entry = (over: Partial<SkillMeta>): SkillMeta => ({
+    path: "/review",
+    title: "Code Review",
+    description: "",
+    isSkill: true,
+    source: { characters: 100, tokens: 25 },
+    runtime: { characters: 80, tokens: 20 },
+    ...over,
+  });
+
+  it("generates per-skill interfaces only for entries that declare variables", async () => {
+    const entries = [
+      entry({
+        path: "/galgame/section-plan",
+        variables: [
+          { name: "heroName", required: true },
+          { name: "isFinale", required: false },
+        ],
+      }),
+      entry({ path: "/plain" }),
+    ];
+    await emitTypesDts(entries, outputDir, "en");
+    const content = readFileSync(join(outputDir, "skill.ts"), "utf-8");
+    expect(content).toContain("export interface GalgameSectionplanVars {");
+    expect(content).toContain("  heroName: string;");
+    expect(content).toContain("  isFinale?: string;");
+    expect(content).not.toContain("export interface PlainVars");
+  });
+
+  it("names the root skill interface RootVars", async () => {
+    await emitTypesDts([entry({ path: "/", variables: [{ name: "name", required: true }] })], outputDir, "en");
+    const content = readFileSync(join(outputDir, "skill.ts"), "utf-8");
+    expect(content).toContain("export interface RootVars {");
+  });
+
+  it("embeds a content preview when contentMap is provided", async () => {
+    const contentMap = new Map<string, string>([["/review", "# Code Review\n\nRule one.\nRule two.\nRule three."]]);
+    await emitTypesDts([entry({})], outputDir, "en", { contentMap });
+    const content = readFileSync(join(outputDir, "skill.ts"), "utf-8");
+    expect(content).toContain("Content preview");
+    expect(content).toContain("# Code Review");
+    expect(content).toContain("Rule one.");
+  });
+
+  it("escapes */ inside preview lines", async () => {
+    const contentMap = new Map<string, string>([["/review", "before */ after"]]);
+    await emitTypesDts([entry({})], outputDir, "en", { contentMap });
+    const content = readFileSync(join(outputDir, "skill.ts"), "utf-8");
+    expect(content).toContain("before *\\/ after");
+  });
+
+  it("truncates the preview and reports remaining lines (zh-CN)", async () => {
+    const contentMap = new Map<string, string>([["/review", ["line1", "line2", "line3", "line4", "line5"].join("\n")]]);
+    await emitTypesDts([entry({})], outputDir, "zh-CN", { contentMap, previewLines: 2 });
+    const content = readFileSync(join(outputDir, "skill.ts"), "utf-8");
+    expect(content).toContain("内容预览（前 2 行）");
+    expect(content).toContain("line1");
+    expect(content).toContain("line2");
+    expect(content).toContain("共 5 行");
+    expect(content).not.toContain("line3");
+  });
+});

@@ -116,6 +116,30 @@ describe.sequential("CLI build", () => {
     expect(runtime).not.toContain("<!--");
     expect(runtime).toContain("Content");
   });
+
+  it("fails with exit code 1 when a placeholder is undeclared", () => {
+    const badDir = join(root, "skills-bad");
+    mkdirSync(badDir, { recursive: true });
+    writeFileSync(join(badDir, "rule.md"), "Use {{ghost}} here.\n", "utf-8");
+    writeFileSync(join(root, "skill.config.js"), [
+      'import { defineConfig } from "review-skill";',
+      "export default defineConfig({",
+      '  skillsDir: "skills-bad",',
+      '  outputDir: ".skill-bad",',
+      "});",
+    ].join("\n"), "utf-8");
+
+    let status = 0;
+    let stderr = "";
+    try {
+      run("");
+    } catch (err: any) {
+      status = err.status ?? 0;
+      stderr = err.stderr ?? "";
+    }
+    expect(status).toBe(1);
+    expect(stderr).toContain("ghost");
+  });
 });
 
 describe("Config loading", () => {

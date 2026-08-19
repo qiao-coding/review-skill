@@ -120,3 +120,72 @@ describe("skill() runtime", () => {
     expect(content).toContain("# State Rules");
   });
 });
+
+describe("pipeline variables contract", () => {
+  const varRoot = join(root, "vars");
+  const varSkills = join(varRoot, "skills");
+  const varOut = join(varRoot, ".skill");
+
+  const writeSkill = (body: string) => {
+    mkdirSync(varSkills, { recursive: true });
+    writeFileSync(join(varSkills, "SKILL.md"), body, "utf-8");
+  };
+
+  afterAll(() => rmSync(varRoot, { recursive: true, force: true }));
+
+  it("parses frontmatter variables into metadata and strips frontmatter from runtime", async () => {
+    writeSkill([
+      "---",
+      "variables:",
+      "  - name: heroName",
+      "  - name: isFinale",
+      "    required: false",
+      "---",
+      "",
+      "# Section Plan",
+      "",
+      "Hello {{heroName}}. Finale: {{isFinale}}.",
+    ].join("\n"));
+
+    const result = await compile(varSkills, varOut);
+    const meta = result.entries.find((e) => e.path === "/")!;
+    expect(meta.variables).toEqual([
+      { name: "heroName", required: true },
+      { name: "isFinale", required: false },
+    ]);
+
+    const runtime = readFileSync(join(varOut, "runtime", "SKILL.md"), "utf-8");
+    expect(runtime).not.toContain("variables:");
+    expect(runtime).not.toContain("---");
+    expect(runtime).toContain("Hello {{heroName}}.");
+  });
+
+  it("rejects the build when a placeholder is undeclared", async () => {
+    writeSkill([
+      "---",
+      "variables:",
+      "  - name: known",
+      "---",
+      "",
+      "Use {{known}} and {{ghost}}.",
+    ].join("\n"));
+
+    await expect(compile(varSkills, varOut)).rejects.toThrow(/ghost/);
+  });
+
+  it("collects warnings for unused optional variables", async () => {
+    writeSkill([
+      "---",
+      "variables:",
+      "  - name: used",
+      "  - name: optional",
+      "    required: false",
+      "---",
+      "",
+      "Body with {{used}} only.",
+    ].join("\n"));
+
+    const result = await compile(varSkills, varOut);
+    expect(result.warnings.some((w) => w.includes("optional"))).toBe(true);
+  });
+});

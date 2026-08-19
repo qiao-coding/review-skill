@@ -22,8 +22,10 @@ await esbuild.build({
     "unified",
     "remark-parse",
     "remark-stringify",
+    "remark-frontmatter",
     "mdast-util-to-string",
     "unist-util-visit",
+    "yaml",
   ],
 });
 

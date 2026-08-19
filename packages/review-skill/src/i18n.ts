@@ -27,6 +27,17 @@ Config: skill.config.js (optional)
     watchRebuild: (time: string) => `[${time}] Rebuilding...`,
     errorSkillNotFound: (path: string) =>
       `Skill not found: "${path}". Run "npx review-skill" to compile.`,
+    buildError: (message: string) => `\n❌ Build failed:\n  ${message}\n`,
+    errorNoFrontmatter: (names: string) =>
+      `Template uses undeclared variables (${names}) but the file has no frontmatter "variables" contract. Add a variables block at the very top of the file.`,
+    errorUndeclared: (name: string) => `Undeclared variable {{${name}}}. Declare it in frontmatter variables or remove the placeholder.`,
+    errorMalformed: (token: string) => `Malformed placeholder ${token}. Use {{camelCaseName}}.`,
+    errorRequiredUnused: (name: string) => `Required variable "${name}" declared but never used in the template.`,
+    warnDeclaredUnused: (name: string) => `Optional variable "${name}" declared but never used in the template.`,
+    errorFrontmatterParse: `Failed to parse YAML frontmatter.`,
+    errorFrontmatterNoVariables: `frontmatter has no "variables" list.`,
+    errorFrontmatterInvalidEntry: (entry: string) => `Invalid variable entry: ${entry}. Each entry needs a "name".`,
+    errorFrontmatterDuplicate: (name: string) => `Duplicate variable "${name}".`,
   },
 
   "zh-CN": {
@@ -55,6 +66,17 @@ Config: skill.config.js (optional)
     watchRebuild: (time: string) => `[${time}] 重新编译中...`,
     errorSkillNotFound: (path: string) =>
       `找不到 Skill: "${path}"。请运行 "npx review-skill" 编译。`,
+    buildError: (message: string) => `\n❌ 编译失败:\n  ${message}\n`,
+    errorNoFrontmatter: (names: string) =>
+      `模板使用了未声明变量（${names}），但文件没有 frontmatter "variables" 契约。请在文件最顶部添加 variables 块。`,
+    errorUndeclared: (name: string) => `未声明变量 {{${name}}}。请在 frontmatter variables 中声明它，或移除该占位符。`,
+    errorMalformed: (token: string) => `畸形占位符 ${token}。请使用 {{camelCaseName}} 格式。`,
+    errorRequiredUnused: (name: string) => `required 变量 "${name}" 已声明但模板未使用。`,
+    warnDeclaredUnused: (name: string) => `可选变量 "${name}" 已声明但模板未使用。`,
+    errorFrontmatterParse: `YAML frontmatter 解析失败。`,
+    errorFrontmatterNoVariables: `frontmatter 中没有 "variables" 列表。`,
+    errorFrontmatterInvalidEntry: (entry: string) => `无效的变量条目: ${entry}。每个条目需要 "name"。`,
+    errorFrontmatterDuplicate: (name: string) => `重复的变量 "${name}"。`,
   },
 };
 

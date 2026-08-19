@@ -27,6 +27,8 @@ interface SkillConfig {
   skillsDir?: string;
   outputDir?: string;
   strip?: Record<string, boolean>;
+  /** Number of runtime lines embedded as a hover preview in the generated JSDoc. */
+  previewLines?: number;
 }
 
 async function loadConfig(): Promise<SkillConfig> {
@@ -173,16 +175,28 @@ async function build() {
   const skillsDir = resolve(cwd, config.skillsDir ?? "skills");
   const outputDir = resolve(cwd, config.outputDir ?? ".skill");
 
-  const start = Date.now();
-  const result = await compile(skillsDir, outputDir, config.strip, lang);
+  try {
+    const start = Date.now();
+    const result = await compile(skillsDir, outputDir, config.strip, lang, {
+      previewLines: config.previewLines,
+    });
 
-  const skills = result.entries.filter((e) => e.isSkill);
-  const reduction = result.sourceTokens - result.runtimeTokens;
-  const rate = result.sourceTokens > 0
-    ? ((reduction / result.sourceTokens) * 100).toFixed(1)
-    : "0.0";
+    for (const w of result.warnings) {
+      console.log(`⚠ ${w}`);
+    }
 
-  console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length, result.sourceTokens, result.runtimeTokens, rate));
+    const skills = result.entries.filter((e) => e.isSkill);
+    const reduction = result.sourceTokens - result.runtimeTokens;
+    const rate = result.sourceTokens > 0
+      ? ((reduction / result.sourceTokens) * 100).toFixed(1)
+      : "0.0";
+
+    console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length, result.sourceTokens, result.runtimeTokens, rate));
+  } catch (err) {
+    // Variable-contract violations and other compile errors → nonzero exit.
+    console.error(msg("buildError", err instanceof Error ? err.message : String(err)));
+    process.exitCode = 1;
+  }
 }
 
 await build();
