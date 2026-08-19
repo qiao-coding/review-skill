@@ -24,7 +24,7 @@ export interface CompileOptions {
    */
   merge?: "absorb" | "keep";
   /** Called after each source file is compiled — lets the CLI log progress. */
-  onFile?: (relativePath: string) => void;
+  onFile?: (file: { relativePath: string; tokens: number }) => void;
 }
 
 export interface CompileResult {
@@ -92,7 +92,6 @@ export async function compile(
     const fileRefs = scanSkillRefs(ast, "/" + file.relativePath);
     refsByFile.push({ relativePath: file.relativePath, refs: fileRefs });
     deps.push({ path: skillPath, refs: fileRefs });
-    opts?.onFile?.(file.relativePath);
 
     // Strip frontmatter at the source level before transform — transform.ts stays untouched.
     const fm = frontmatterRange(ast);
@@ -103,6 +102,7 @@ export async function compile(
     const runtimeContent = await transformMarkdown(sourceForTransform, strip);
     const runtimeChars = runtimeContent.length;
     const runtimeTokens = estimateTokens(runtimeChars);
+    opts?.onFile?.({ relativePath: file.relativePath, tokens: runtimeTokens });
 
     const entry: SkillMeta = {
       path: skillPath,

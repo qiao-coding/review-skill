@@ -206,13 +206,25 @@ async function build() {
   const outputDir = resolve(cwd, config.outputDir ?? ".skill");
 
   // Code-build style output: spinner while compiling, one ✔ line per compiled
-  // file, then the skill dependency tree, then the summary.
+  // file with its token cost, then the skill dependency tree, then the summary.
   const isTty = Boolean(process.stdout.isTTY);
+  const color = (code: string) => (isTty ? code : "");
+  const C = {
+    reset: color("\x1b[0m"),
+    cyan: color("\x1b[36m"),
+    green: color("\x1b[32m"),
+    yellow: color("\x1b[33m"),
+    bold: color("\x1b[1m"),
+  };
+  const rule = (label = "") =>
+    `${C.cyan}◈${C.reset} ${C.bold}${label}${C.reset} ${C.cyan}${"─".repeat(36)}${C.reset}`;
+  const tok = (n: number) => `${C.yellow}~${n}${C.reset} tokens`;
+
   const spinnerFrames = ["◐", "◓", "◑", "◒"];
   let frame = 0;
   const spinner = isTty
     ? setInterval(() => {
-        process.stdout.write(`\r${spinnerFrames[frame++ % spinnerFrames.length]} ${msg("buildCompiling")}`);
+        process.stdout.write(`\r${C.cyan}${spinnerFrames[frame++ % spinnerFrames.length]}${C.reset} ${msg("buildCompiling")}`);
       }, 100)
     : null;
   const clearLine = () => {
@@ -220,41 +232,42 @@ async function build() {
   };
 
   try {
+    console.log(rule());
     const start = Date.now();
     const result = await compile(skillsDir, outputDir, config.strip, lang, {
       previewLines: config.previewLines,
       merge: config.merge,
-      onFile: (relativePath) => {
+      onFile: ({ relativePath, tokens }) => {
         clearLine();
-        console.log(`✔ ${relativePath}`);
+        console.log(`  ${C.green}✔${C.reset} ${relativePath}   ${tok(tokens)}`);
       },
     });
     if (spinner) clearInterval(spinner);
     clearLine();
 
-    for (const w of result.warnings) {
-      console.log(`⚠ ${w}`);
-    }
+    for (const w of result.warnings) console.log(`  ${C.yellow}⚠${C.reset} ${w}`);
 
     // Skill dependency tree — who references what (the routing graph), each
     // node annotated with its estimated runtime-injection tokens.
     const tokenByPath = new Map(result.entries.map((e) => [e.path, e.runtime.tokens]));
     const withRefs = result.deps.filter((d) => d.refs.length);
     if (withRefs.length) {
-      console.log(`\n${msg("buildDeps")}`);
+      console.log(`\n${rule(msg("buildDeps"))}`);
       for (const { path, refs } of withRefs) {
-        const tok = tokenByPath.get(path);
-        console.log(`  ${path}${tok != null ? ` · ~${tok} tokens` : ""}`);
+        const n = tokenByPath.get(path);
+        console.log(`  ${C.cyan}${path}${C.reset}${n != null ? ` · ${tok(n)}` : ""}`);
         for (let i = 0; i < refs.length; i++) {
-          const rtok = tokenByPath.get(refs[i]);
-          console.log(`    ${i === refs.length - 1 ? "└─" : "├─"} ${refs[i]}${rtok != null ? ` · ~${rtok} tokens` : ""}`);
+          const m = tokenByPath.get(refs[i]);
+          console.log(`    ${i === refs.length - 1 ? "└─" : "├─"} ${refs[i]}${m != null ? ` · ${tok(m)}` : ""}`);
         }
       }
     }
 
     const skills = result.entries.filter((e) => e.isSkill);
-    console.log(`\n${msg("buildResult", result.entries.length, Date.now() - start, skills.length)}`);
+    console.log(`\n${rule(msg("buildSummary"))}`);
+    console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length));
     console.log(msg("buildInjected", result.runtimeTokens));
+    console.log(`${C.cyan}◈${C.reset} ${C.cyan}${"─".repeat(37)}${C.reset}`);
   } catch (err) {
     if (spinner) clearInterval(spinner);
     clearLine();
