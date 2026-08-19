@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { loadSkills, resolveRuntimeFile, previewLines, mentionToPath } from "../src/core.js";
+import { loadSkills, resolveRuntimeFile, previewLines, mentionToPath, mentionStart } from "../src/core.js";
 import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -88,5 +88,23 @@ describe("previewLines", () => {
 describe("mentionToPath", () => {
   it("strips the leading @", () => {
     expect(mentionToPath("@/galgame/section-plan")).toBe("/galgame/section-plan");
+  });
+});
+
+describe("mentionStart", () => {
+  it("finds the start of a partial @ mention at the cursor", () => {
+    expect(mentionStart("See @/react rul", 10)).toBe(4); // cursor after "react"
+  });
+  it("finds a bare @", () => {
+    expect(mentionStart("See @ here", 5)).toBe(4);
+  });
+  it("returns -1 outside a mention", () => {
+    expect(mentionStart("See path here", 4)).toBe(-1);
+    expect(mentionStart("See @x, y", 8)).toBe(-1); // past the mention, after space
+  });
+  it("keeps the start correct when @ and / are word chars", () => {
+    // "See @/galgame/section-plan." cursor before the trailing period
+    const line = "See @/galgame/section-plan.";
+    expect(mentionStart(line, line.length - 1)).toBe(4);
   });
 });

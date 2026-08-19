@@ -6,23 +6,48 @@
  * surface for `@/`). Data comes from `.skill/metadata.json` + `.skill/runtime/`.
  */
 import * as vscode from "vscode";
-import { loadSkills, resolveRuntimeFile, previewLines, MENTION_RE } from "./core";
+import { loadSkills, resolveRuntimeFile, previewLines, mentionStart, MENTION_RE } from "./core";
 
-const REF_RE = /@\/[\w/.-]*/;
+function workspaceRoot(): string {
+  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "";
+}
+
+/** Range of the `@...` mention under the cursor, or undefined outside one. */
+function mentionRange(document: vscode.TextDocument, position: vscode.Position): vscode.Range | undefined {
+  const start = mentionStart(document.lineAt(position.line).text, position.character);
+  if (start < 0) return undefined;
+  return new vscode.Range(position.line, start, position.line, position.character);
+}
 
 export function activate(context: vscode.ExtensionContext) {
-  const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "";
-  const skills = loadSkills(root);
+  // Visible activation signal — the extension contributes no commands/UI, so
+  // without this there's no way to tell it loaded or how many skills it found.
+  const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  context.subscriptions.push(statusBar);
+
+  const refreshStatus = () => {
+    const skills = loadSkills(workspaceRoot());
+    statusBar.text = `$(book) review-skill: ${skills.length} skills`;
+    statusBar.tooltip = skills.length
+      ? skills.map((s) => s.path).join("\n")
+      : "No .skill/metadata.json — run `npx review-skill` to compile.";
+    statusBar.show();
+  };
+  refreshStatus();
+  // Re-read when the workspace root changes (e.g. a folder is opened after launch).
+  context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(refreshStatus));
 
   // ── Completion: type `@` → list every compiled skill/resource ──
+  // Load per request so skills reflect the current workspace root even if the
+  // extension activated before the target folder was opened.
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
       "markdown",
       {
         provideCompletionItems(document, position) {
-          const range =
-            document.getWordRangeAtPosition(position, REF_RE) ??
-            new vscode.Range(position, position);
+          const root = workspaceRoot();
+          const skills = loadSkills(root);
+          const range = mentionRange(document, position) ?? new vscode.Range(position, position);
 
           return skills.map((s) => {
             const item = new vscode.CompletionItem(`@${s.path}`, vscode.CompletionItemKind.File);
@@ -42,12 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.languages.registerHoverProvider("markdown", {
       provideHover(document, position) {
-        const range = document.getWordRangeAtPosition(position, REF_RE);
+        const range = mentionRange(document, position);
         if (!range) return;
         const mention = document.getText(range);
         if (!MENTION_RE.test(mention)) return;
         const path = mention.slice(1); // strip "@"
-        const skill = skills.find((s) => s.path === path);
+        const root = workspaceRoot();
+        const skill = loadSkills(root).find((s) => s.path === path);
         if (!skill) return;
 
         const content = resolveRuntimeFile(root, path, skill.isSkill);

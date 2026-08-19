@@ -52,3 +52,15 @@ export function previewLines(content: string, max: number): string {
 export function mentionToPath(mention: string): string {
   return mention.startsWith("@") ? mention.slice(1) : mention;
 }
+
+/**
+ * Start index of the `@...` mention on `line` that ends at `character`, or -1
+ * when the cursor is not inside one. A manual backward scan keeps the range
+ * correct even when `@`/`/` are word separators (so a completion replaces the
+ * `@` itself, not producing `@@`).
+ */
+export function mentionStart(line: string, character: number): number {
+  let start = character;
+  while (start > 0 && /[@\w/.\-]/.test(line[start - 1])) start--;
+  return line[start] === "@" ? start : -1;
+}
