@@ -9,6 +9,7 @@ import { mkdir, writeFile, readFile, appendFile } from "node:fs/promises";
 import { existsSync, watch } from "node:fs";
 import { join, resolve } from "node:path";
 import { msg, lang } from "./i18n.js";
+import type { StripOptions, Strip } from "./types.js";
 
 const cwd = process.cwd();
 const args = process.argv.slice(2);
@@ -27,7 +28,8 @@ if (isHelp) {
 interface SkillConfig {
   skillsDir?: string;
   outputDir?: string;
-  strip?: Record<string, boolean>;
+  /** Character-based strip tokens, or the deprecated object form. */
+  strip?: StripOptions | Strip;
   /** Number of runtime lines embedded as a hover preview in the generated JSDoc. */
   previewLines?: number;
 }
@@ -87,16 +89,19 @@ if (isInit) {
       '  /** Output directory for compiled artifacts */',
       '  outputDir: ".skill",',
       "",
-      "  /** Markdown elements to strip during compilation (all default to true) */",
-      "  strip: {",
-      "    comment: true,        // <!-- HTML comments -->",
-      "    formatting: true,     // **bold** *italic* ~~strike~~",
-      "    image: true,          // ![alt](url)",
-      "    blockquote: true,     // > quotes",
-      "    thematicBreak: true,  // --- horizontal rules",
-      "    bullet: true,         // * - + list markers",
-      "    whitespace: true,     // extra blank lines, trailing spaces",
-      "  },",
+      '  /** Markdown elements to strip — character-based tokens (TS-hinted). */',
+      '  /** Delete entries you want KEPT. Omit strip entirely to return the original file. */',
+      "  strip: [",
+      '    "<!-- HTML -->", // HTML comments',
+      '    "**bold**",       // bold',
+      '    "*italic*",       // italic',
+      '    "~~strikethrough~~",',
+      '    "![alt](url)",    // images',
+      '    "> quote",        // blockquotes',
+      '    "---",            // horizontal rules',
+      '    "- item",         // bullet markers',
+      '    "\\n\\n",           // blank-line collapse',
+      "  ],",
       "});",
       "",
     ].join("\n"), "utf-8");

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { compile } from "../src/compiler/pipeline.js";
+import { STRIP_ALL } from "../src/types.js";
 import { loadMetadata, createSkill } from "../src/skill.js";
 import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -49,7 +50,7 @@ afterAll(() => {
 
 describe("pipeline", () => {
   it("compiles skills and generates output", async () => {
-    const result = await compile(skillsDir, outputDir);
+    const result = await compile(skillsDir, outputDir, STRIP_ALL);
 
     expect(result.entries).toHaveLength(3);
     expect(result.sourceTokens).toBeGreaterThan(0);
@@ -204,5 +205,35 @@ describe("pipeline variables contract", () => {
     const result = await compile(varSkills, varOut);
     expect(result.warnings.some((w) => w.includes("@/missing-skill"))).toBe(true);
     expect(result.warnings.some((w) => w.includes("@/galgame/section-plan"))).toBe(false);
+  });
+
+  it("accepts the character-based token strip form without warnings", async () => {
+    writeSkill(["# Token Strip", "**bold** and *italic*."].join("\n"));
+    const result = await compile(varSkills, varOut, ["*italic*"]);
+    expect(result.warnings.length).toBe(0);
+    const runtime = readFileSync(join(varOut, "runtime", "SKILL.md"), "utf-8");
+    expect(runtime).not.toContain("*italic*");
+    expect(runtime).toContain("**bold**"); // strong kept
+  });
+
+  it("returns the original runtime when strip is not configured", async () => {
+    writeSkill(["# Raw", "<!-- keep me --> **bold**"].join("\n"));
+    const result = await compile(varSkills, varOut);
+    const runtime = readFileSync(join(varOut, "runtime", "SKILL.md"), "utf-8");
+    expect(runtime).toContain("<!-- keep me -->");
+    expect(runtime).toContain("**bold**");
+    expect(result.warnings.length).toBe(0);
+  });
+
+  it("warns with a migration hint when the deprecated object strip form is used", async () => {
+    writeSkill(["# Object Strip", "**bold** text."].join("\n"));
+    const result = await compile(varSkills, varOut, { formatting: false });
+    // warning text is locale-dependent (zh-CN test machine) — match both
+    const dep = result.warnings.find((w) => /已弃用|deprecated/.test(w));
+    expect(dep).toBeDefined();
+    // migration hint lists the equivalent tokens (blockquote `> quote` is kept here)
+    expect(dep).toContain('"> quote"');
+    const runtime = readFileSync(join(varOut, "runtime", "SKILL.md"), "utf-8");
+    expect(runtime).toContain("**bold**"); // legacy behavior kept
   });
 });

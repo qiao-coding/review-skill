@@ -229,7 +229,10 @@ agent.setSystemPrompt(guide.content);
 
 ## Configuration
 
-`skill.config.js` controls what gets stripped during compilation:
+`skill.config.js` controls what gets stripped during compilation — `strip` is a
+**character-based token array**: list the exact markdown syntax literals to strip
+(each is TS-autocompleted), omit anything you want kept. **Not configuring
+`strip` at all strips nothing — the original file is returned as-is**:
 
 ```js
 import { defineConfig } from "review-skill";
@@ -237,19 +240,30 @@ import { defineConfig } from "review-skill";
 export default defineConfig({
   skillsDir: "skills",
   outputDir: ".skill",
-  strip: {
-    comment: true,        // <!-- HTML comments -->
-    formatting: true,     // **bold** *italic* ~~strike~~
-    image: true,          // ![alt](url)
-    blockquote: true,     // > quotes
-    thematicBreak: true,  // --- horizontal rules
-    bullet: true,         // * - + list markers
-    whitespace: true,     // blank lines, trailing spaces
-  },
+  // delete entries you want KEPT; omit strip entirely to return the original:
+  strip: [
+    "<!-- HTML -->", // HTML comments
+    "**bold**",       // bold
+    "*italic*",       // italic
+    "~~strikethrough~~",
+    "![alt](url)",    // images
+    "> quote",        // blockquotes
+    "---",            // horizontal rules
+    "- item",         // bullet markers
+    "\n\n",           // blank-line collapse
+  ],
 });
 ```
 
-Set any option to `false` to keep that element in the runtime output.
+Available tokens (see `STRIP_TOKENS`): `"<!-- HTML -->"` HTML comments ·
+`"**bold**"` bold · `"*italic*"` italic · `"~~strikethrough~~"` strikethrough ·
+`"![alt](url)"` images · `"> quote"` blockquotes · `"---"` horizontal rules ·
+`"- item"` bullet markers · `"\n\n"` blank-line collapse.
+An empty array `strip: []` strips nothing.
+
+The legacy object form (`strip: { formatting: false }`) still works but is
+deprecated — the compiler warns with the exact equivalent token array. Migration
+guide: [docs/strip.md](docs/strip.md).
 
 ## Links
 

@@ -58,12 +58,14 @@ export function remarkStripComments() {
 
 // ── Plugin 2: Strip bold / italic / strikethrough (outside code blocks) ─
 
-export function remarkStripInlineFormatting() {
+type InlineFormattingType = "strong" | "emphasis" | "delete";
+
+export function remarkStripInlineFormatting(types: readonly InlineFormattingType[]) {
   return (tree: Root) => {
     const codeRanges = getCodeRanges(tree);
     const replacements: Array<{ parent: Parent; index: number; children: any[] }> = [];
 
-    for (const type of ["strong", "emphasis", "delete"] as const) {
+    for (const type of types) {
       visit(tree, type, (node: Strong | Emphasis | Delete, index, parent) => {
         if (!parent || typeof index !== "number") return;
         if (!isInCodeBlock(node, codeRanges)) {
@@ -230,31 +232,130 @@ export function cleanWhitespace(content: string): string {
 
 // ── Full pipeline ────────────────────────────────────────────
 
-import type { StripOptions } from "../types.js";
+import { msg } from "../i18n.js";
+import { STRIP_TOKENS } from "../types.js";
+import type { StripOptions, Strip, StripToken } from "../types.js";
+
+/** Fully-resolved strip settings — every element is an explicit boolean. */
+export interface NormalizedStrip {
+  comment: boolean;
+  strong: boolean;
+  emphasis: boolean;
+  delete: boolean;
+  image: boolean;
+  blockquote: boolean;
+  thematicBreak: boolean;
+  bullet: boolean;
+  whitespace: boolean;
+}
+
+const NOTHING_STRIPPED: NormalizedStrip = {
+  comment: false,
+  strong: false,
+  emphasis: false,
+  delete: false,
+  image: false,
+  blockquote: false,
+  thematicBreak: false,
+  bullet: false,
+  whitespace: false,
+};
+
+/**
+ * Normalize either strip spec to explicit booleans.
+ *
+ * - `undefined` → nothing is stripped (the original file is returned unchanged).
+ * - `Strip` (token array) → strip exactly the listed tokens; `[]` strips nothing.
+ * - `StripOptions` (object) → legacy object form, deprecated. Emits a migration
+ *   warning into `warnings` (once, when provided) listing the equivalent tokens.
+ */
+export function normalizeStrip(
+  strip: StripOptions | Strip | undefined,
+  warnings?: string[]
+): NormalizedStrip {
+  if (strip == null) return NOTHING_STRIPPED;
+  if (Array.isArray(strip)) {
+    const set = new Set<StripToken>(strip);
+    const o = { ...NOTHING_STRIPPED };
+    o.comment = set.has(STRIP_TOKENS.comment);
+    o.strong = set.has(STRIP_TOKENS.strong);
+    o.emphasis = set.has(STRIP_TOKENS.emphasis);
+    o.delete = set.has(STRIP_TOKENS.delete);
+    o.image = set.has(STRIP_TOKENS.image);
+    o.blockquote = set.has(STRIP_TOKENS.blockquote);
+    o.thematicBreak = set.has(STRIP_TOKENS.thematicBreak);
+    o.bullet = set.has(STRIP_TOKENS.bullet);
+    o.whitespace = set.has(STRIP_TOKENS.whitespace);
+    return o;
+  }
+
+  // ── deprecated object form: keep legacy behavior, warn with migration ──
+  const o = strip;
+  const formatting = o.formatting ?? true;
+  const normalized: NormalizedStrip = {
+    comment: o.comment ?? true,
+    strong: formatting,
+    emphasis: formatting,
+    delete: formatting,
+    image: o.image ?? true,
+    blockquote: o.blockquote ?? true,
+    thematicBreak: o.thematicBreak ?? true,
+    bullet: o.bullet ?? true,
+    whitespace: o.whitespace ?? true,
+  };
+  warnings?.push(msg("deprecatedStrip", stripObjectToTokens(strip)));
+  return normalized;
+}
+
+/** The token array equivalent of an object-form strip — used in the migration warning. */
+function stripObjectToTokens(strip: StripOptions): string {
+  const kept: StripToken[] = [];
+  if (strip.comment !== false) kept.push(STRIP_TOKENS.comment);
+  if (strip.formatting !== false) {
+    kept.push(STRIP_TOKENS.strong, STRIP_TOKENS.emphasis, STRIP_TOKENS.delete);
+  }
+  if (strip.image !== false) kept.push(STRIP_TOKENS.image);
+  if (strip.blockquote !== false) kept.push(STRIP_TOKENS.blockquote);
+  if (strip.thematicBreak !== false) kept.push(STRIP_TOKENS.thematicBreak);
+  if (strip.bullet !== false) kept.push(STRIP_TOKENS.bullet);
+  if (strip.whitespace !== false) kept.push(STRIP_TOKENS.whitespace);
+  // JSON.stringify escapes the literal "\n\n" token so the hint reads `"\n\n"`, not a real newline
+  return `[${kept.map((t) => JSON.stringify(t)).join(", ")}]`;
+}
 
 export async function transformMarkdown(
   sourceContent: string,
-  strip: StripOptions = {}
+  strip?: StripOptions | Strip
 ): Promise<string> {
-  const opts = {
-    comment: true,
-    formatting: true,
-    image: true,
-    blockquote: true,
-    thematicBreak: true,
-    bullet: true,
-    whitespace: true,
-    ...strip,
-  };
+  const opts = normalizeStrip(strip);
+
+  // Nothing configured → return the original file untouched (opt-in stripping).
+  if (
+    !opts.comment &&
+    !opts.strong &&
+    !opts.emphasis &&
+    !opts.delete &&
+    !opts.image &&
+    !opts.blockquote &&
+    !opts.thematicBreak &&
+    !opts.bullet &&
+    !opts.whitespace
+  ) {
+    return sourceContent;
+  }
 
   // Build the processor chain — plugins only apply when enabled
   const processor = unified().use(remarkParse);
 
-  if (opts.comment)         processor.use(remarkStripComments);
-  if (opts.formatting)      processor.use(remarkStripInlineFormatting);
-  if (opts.image)           processor.use(remarkStripImages);
-  if (opts.blockquote)      processor.use(remarkStripBlockquotes);
-  if (opts.thematicBreak)   processor.use(remarkStripThematicBreaks);
+  if (opts.comment) processor.use(remarkStripComments);
+  const inlineTypes: InlineFormattingType[] = [];
+  if (opts.strong) inlineTypes.push("strong");
+  if (opts.emphasis) inlineTypes.push("emphasis");
+  if (opts.delete) inlineTypes.push("delete");
+  if (inlineTypes.length) processor.use(remarkStripInlineFormatting, inlineTypes);
+  if (opts.image) processor.use(remarkStripImages);
+  if (opts.blockquote) processor.use(remarkStripBlockquotes);
+  if (opts.thematicBreak) processor.use(remarkStripThematicBreaks);
 
   processor.use(remarkStringify);
 

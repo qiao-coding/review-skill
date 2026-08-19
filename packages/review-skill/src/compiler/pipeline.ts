@@ -2,12 +2,12 @@ import { readFile } from "node:fs/promises";
 import { discover } from "./discover.js";
 import { parseMarkdown } from "./parse.js";
 import { analyze } from "./analyze.js";
-import { transformMarkdown } from "./transform.js";
+import { normalizeStrip, transformMarkdown } from "./transform.js";
 import { estimateTokens } from "./tokenize.js";
 import { emitRuntime, emitMetadata, emitTypesDts } from "./emit/index.js";
 import { frontmatterRange, validateVariables, scanSkillRefs } from "./variables.js";
 import { msg } from "../i18n.js";
-import type { SkillMeta, StripOptions } from "../types.js";
+import type { SkillMeta, StripOptions, Strip } from "../types.js";
 
 export interface CompileOptions {
   /** Number of runtime lines embedded as a hover preview in the generated JSDoc. */
@@ -25,7 +25,7 @@ export interface CompileResult {
 export async function compile(
   skillsDir: string,
   outputDir: string,
-  strip?: StripOptions,
+  strip?: StripOptions | Strip,
   lang?: string,
   opts?: CompileOptions
 ): Promise<CompileResult> {
@@ -36,6 +36,9 @@ export async function compile(
   const errors: string[] = [];
   const previewLines = opts?.previewLines;
   const refsByFile: { relativePath: string; refs: string[] }[] = [];
+
+  // Deprecated object-form strip → single migration warning (transformMarkdown re-normalizes per file).
+  normalizeStrip(strip, warnings);
 
   // Group by skill to count files
   const skillFileCount = new Map<string, number>();

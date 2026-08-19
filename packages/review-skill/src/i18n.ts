@@ -35,6 +35,8 @@ Config: skill.config.js (optional)
     errorRequiredUnused: (name: string) => `Required variable "${name}" declared but never used in the template.`,
     warnDeclaredUnused: (name: string) => `Optional variable "${name}" declared but never used in the template.`,
     warnUnknownRef: (ref: string) => `Unknown skill reference ${ref}. Add a skill at this path or fix the reference.`,
+    deprecatedStrip: (equivalent: string) =>
+      `strip object form is deprecated — use the character-based token array instead:\n    strip: ${equivalent}\n  Each token is a markdown syntax literal (see review-skill types STRIP_TOKENS). Omit anything you want kept.`,
     errorFrontmatterParse: `Failed to parse YAML frontmatter.`,
     errorFrontmatterNoVariables: `frontmatter has no "variables" list.`,
     errorFrontmatterInvalidEntry: (entry: string) => `Invalid variable entry: ${entry}. Each entry needs a "name".`,
@@ -75,6 +77,8 @@ Config: skill.config.js (optional)
     errorRequiredUnused: (name: string) => `required 变量 "${name}" 已声明但模板未使用。`,
     warnDeclaredUnused: (name: string) => `可选变量 "${name}" 已声明但模板未使用。`,
     warnUnknownRef: (ref: string) => `未识别的 skill 引用 ${ref}。请创建该路径的 skill，或修正引用。`,
+    deprecatedStrip: (equivalent: string) =>
+      `strip 对象形式已弃用 —— 请改用字符 token 数组：\n    strip: ${equivalent}\n  每个 token 是 markdown 语法字面量（见 review-skill 类型 STRIP_TOKENS）。想保留的不要列。`,
     errorFrontmatterParse: `YAML frontmatter 解析失败。`,
     errorFrontmatterNoVariables: `frontmatter 中没有 "variables" 列表。`,
     errorFrontmatterInvalidEntry: (entry: string) => `无效的变量条目: ${entry}。每个条目需要 "name"。`,

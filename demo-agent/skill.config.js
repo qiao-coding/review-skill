@@ -7,27 +7,17 @@ export default defineConfig({
   /** Output directory for compiled artifacts */
   outputDir: ".skill",
 
-  /** Markdown elements to strip during compilation (all default to true) */
-  strip: {
-    /** <!-- HTML comments --> */
-    comment: true,
-
-    /** **bold** *italic* ~~strikethrough~~ */
-    formatting: true,
-
-    /** ![images](url) */
-    image: true,
-
-    /** > blockquotes */
-    blockquote: true,
-
-    /** --- horizontal rules */
-    thematicBreak: true,
-
-    /** * - + list bullet markers */
-    bullet: true,
-
-    /** extra blank lines and trailing whitespace */
-    whitespace: true,
-  },
+  /** Markdown elements to strip — character-based token array (TS-hinted). */
+  /** Delete entries you want KEPT. Omit strip entirely to return the original file. */
+  strip: [
+    "<!-- HTML -->", // HTML comments
+    "**bold**",       // bold
+    "*italic*",       // italic
+    "~~strikethrough~~",
+    "![alt](url)",    // images
+    "> quote",        // blockquotes
+    "---",            // horizontal rules
+    "- item",         // bullet markers
+    "\n\n",           // blank-line collapse
+  ],
 });

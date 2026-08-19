@@ -46,14 +46,12 @@ describe.sequential("CLI --init", () => {
     expect(cfg).toContain('import { defineConfig } from "review-skill"');
     expect(cfg).toContain("skillsDir");
     expect(cfg).toContain("outputDir");
-    expect(cfg).toContain("strip:");
-    expect(cfg).toContain("comment: true");
-    expect(cfg).toContain("formatting: true");
-    expect(cfg).toContain("image: true");
-    expect(cfg).toContain("blockquote: true");
-    expect(cfg).toContain("thematicBreak: true");
-    expect(cfg).toContain("bullet: true");
-    expect(cfg).toContain("whitespace: true");
+    expect(cfg).toContain("strip: [");
+    // character-based tokens with English names are shown
+    expect(cfg).toContain('"<!-- HTML -->"');
+    expect(cfg).toContain('"**bold**"');
+    expect(cfg).toContain('"> quote"');
+    expect(cfg).toContain('"\\n\\n"');
   });
 
   it("adds type:module to package.json", () => {

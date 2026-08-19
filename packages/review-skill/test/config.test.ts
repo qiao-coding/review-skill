@@ -21,12 +21,11 @@ function setup(skills: Record<string, string>) {
 afterAll(() => rmSync(root, { recursive: true, force: true }));
 
 describe("strip config", () => {
-  it("strips bold by default", async () => {
+  it("keeps bold by default — stripping is opt-in", async () => {
     setup({ "SKILL.md": "**bold** text" });
     const r = await compile(skillsDir, outputDir);
     const content = readFileSync(join(outputDir, "runtime", "SKILL.md"), "utf-8");
-    expect(content).not.toContain("**");
-    expect(content).toContain("bold");
+    expect(content).toContain("**bold**");
   });
 
   it("preserves bold when formatting=false", async () => {
