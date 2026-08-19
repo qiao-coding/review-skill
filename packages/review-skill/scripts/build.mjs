@@ -29,7 +29,7 @@ await esbuild.build({
   ],
 });
 
-// 3. Bundle + minify library entry
+// 3. Bundle + minify library entry (runtime — lean, node builtins only)
 await esbuild.build({
   entryPoints: ["src/index.ts"],
   bundle: true,
@@ -42,10 +42,32 @@ await esbuild.build({
   external: ["node:*"],
 });
 
-// Clean up tsc artifacts (we only need .d.ts, not .js)
-import { rm } from "fs/promises";
-await rm("dist/compiler", { recursive: true, force: true });
+// 4. Bundle + minify programmatic compiler entry (subpath `review-skill/compiler`)
+await esbuild.build({
+  entryPoints: ["src/compiler/index.ts"],
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  outfile: "dist/compiler.js",
+  minify: true,
+  sourcemap: false,
+  target: "node22",
+  external: [
+    "node:*",
+    "fast-glob",
+    "unified",
+    "remark-parse",
+    "remark-stringify",
+    "remark-frontmatter",
+    "mdast-util-to-string",
+    "unist-util-visit",
+    "yaml",
+  ],
+});
+
+// Note: dist/compiler/*.d.ts (from `tsc --emitDeclarationOnly`) is kept — it backs the `./compiler` subpath.
 
 console.log("Build complete — minified + no sourcemaps");
-console.log(`  dist/cli.js   ${(await import("fs")).statSync("dist/cli.js").size.toLocaleString()} bytes`);
-console.log(`  dist/index.js ${(await import("fs")).statSync("dist/index.js").size.toLocaleString()} bytes`);
+console.log(`  dist/cli.js       ${(await import("fs")).statSync("dist/cli.js").size.toLocaleString()} bytes`);
+console.log(`  dist/index.js     ${(await import("fs")).statSync("dist/index.js").size.toLocaleString()} bytes`);
+console.log(`  dist/compiler.js  ${(await import("fs")).statSync("dist/compiler.js").size.toLocaleString()} bytes`);
