@@ -1,6 +1,6 @@
 {
   "name": "@review-skill/vite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vite plugin for review-skill — skills as first-class typed modules (@skill/* virtual imports + auto-compile)",
   "type": "module",
   "main": "./dist/index.js",
