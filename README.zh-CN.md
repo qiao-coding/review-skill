@@ -1,6 +1,6 @@
 # review-skill
 
-TypeScript Agent Skill 编译器 — 类型安全引用、Token 统计、零 IDE 插件。
+TypeScript-first Skill 框架 — 用 Markdown 编写 skill，编译一次，以类型化导入消费。类型安全引用、Token 统计、零 IDE 插件。
 
 ![review-skill 项目概览](assets/review-skill-overview.png)
 
@@ -8,6 +8,7 @@ TypeScript Agent Skill 编译器 — 类型安全引用、Token 统计、零 IDE
 
 ## 导航
 
+- [框架](#框架)
 - [功能介绍](#功能介绍)
 - [快速开始](#快速开始)
 - [不同 Agent 框架如何接入](#不同-agent-框架如何接入)
@@ -24,7 +25,19 @@ skills/                        ↓                           .skill/runtime/
   review/rules.md   →          类型化导入                    rules.content
 ```
 
-其他工具把 Markdown 注入 AGENTS.md 或生成独立 agent。**review-skill 面向 TypeScript 开发者，把 Skill 当成代码依赖来追踪**——自动补全、Hover 信息、类型检查、Token 统计，全部由编译器生成，零插件。
+其他工具把 Markdown 注入 AGENTS.md 或生成独立 agent。**review-skill 是一个 Skill 框架，面向 TypeScript 开发者，把 Skill 当成代码依赖来追踪**——自动补全、Hover 信息、类型检查、Token 统计，全部由编译器生成，零插件。
+
+## 框架
+
+review-skill 是一个**框架**，不只是编译器。三层协作，共享同一个数据源（`.skill/`）：
+
+| 层 | 你得到什么 |
+|---|---|
+| **编译器** — `npx review-skill` | `skills/*.md` → 省 token 的 `.skill/` 运行时；链接引用编译期校验；`--init` 零手动配置初始化项目 |
+| **运行时** — `@review-skill/skill` | 类型化 `skill("/path")` 导入：自动补全、hover 元信息、token 统计、`bundle()` 输出单个自包含上下文 |
+| **集成** — `@review-skill/vite` | skill 变成一等公民的 `@skill/*` 虚拟模块——像 import 普通模块一样消费，插件自动编译 |
+
+编辑器侧是原生 markdown 链接，任何一层都不需要 IDE 插件。
 
 ## 功能介绍
 

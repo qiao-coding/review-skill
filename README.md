@@ -1,6 +1,6 @@
 # review-skill
 
-A TypeScript-first compiler for Markdown Agent Skills — type-safe references, token-aware runtime, zero IDE plugins.
+A TypeScript-first skill framework for Markdown Agent Skills — author skills in Markdown, compile once, consume them as typed imports. Type-safe references, token-aware runtime, zero IDE plugins.
 
 ![review-skill overview](assets/review-skill-overview.png)
 
@@ -8,6 +8,7 @@ Language: English | [简体中文](README.zh-CN.md)
 
 ## Navigation
 
+- [Framework](#framework)
 - [Features](#features)
 - [Quick start](#quick-start)
 - [Agent framework integrations](#agent-framework-integrations)
@@ -24,7 +25,19 @@ skills/                        ↓                             .skill/runtime/
   review/rules.md   →          typed imports                 review.content
 ```
 
-Other tools inject into AGENTS.md or generate standalone agents. **review-skill is for TypeScript developers who want their skills tracked like code dependencies** — autocomplete, hover info, type-checking, and token stats, all through the compiler's generated type declarations. No IDE plugin needed.
+Other tools inject into AGENTS.md or generate standalone agents. **review-skill is a skill framework for TypeScript developers who want their skills tracked like code dependencies** — autocomplete, hover info, type-checking, and token stats, all through the compiler's generated type declarations. No IDE plugin needed.
+
+## Framework
+
+review-skill is a **framework**, not just a compiler. Three layers work on one source of truth (`.skill/`):
+
+| Layer | What you get |
+|---|---|
+| **Compiler** — `npx review-skill` | `skills/*.md` → token-optimized `.skill/` runtime; link references validated at build time; `--init` bootstraps a project with zero manual config |
+| **Runtime** — `@review-skill/skill` | Typed `skill("/path")` imports with autocomplete, hover metadata, token stats, and `bundle()` for a single self-contained context |
+| **Integration** — `@review-skill/vite` | Skills as first-class `@skill/*` virtual modules — import a skill like any other module; the plugin compiles on demand |
+
+The editor experience is native markdown links — no IDE plugin at any layer.
 
 ## Features
 
