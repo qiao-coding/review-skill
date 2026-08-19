@@ -140,27 +140,35 @@ describe("validateVariables", () => {
 });
 
 describe("scanSkillRefs", () => {
-  it("collects @/path references from prose", () => {
-    const root = parseMarkdown("See @/galgame/section-plan and @/review/rules/state.md.");
-    expect(scanSkillRefs(root)).toEqual(["@/galgame/section-plan", "@/review/rules/state.md"]);
+  it("collects link references from prose", () => {
+    const root = parseMarkdown("See [section-plan](../galgame/section-plan) and [state](../review/rules/state.md).");
+    expect(scanSkillRefs(root, "/")).toEqual(["/galgame/section-plan", "/review/rules/state.md"]);
   });
 
-  it("ignores bare @mentions without a leading slash", () => {
-    const root = parseMarkdown("Mention @user and @todo, but not @foo/bar either.");
-    expect(scanSkillRefs(root)).toEqual([]);
+  it("skips external URLs, anchors, mailto, and image links", () => {
+    const root = parseMarkdown(
+      "[docs](https://example.com/a.md), [anchor](#section), [mail](mailto:a@b.com), ![diagram](../diagram.png)"
+    );
+    expect(scanSkillRefs(root, "/")).toEqual([]);
   });
 
   it("ignores references inside code blocks and inline code", () => {
     const root = parseMarkdown(
       [
-        "Real ref: @/galgame/section-plan.",
+        "Real ref: [section-plan](../galgame/section-plan).",
         "```ts",
-        "const p = '@/hidden/path';",
+        "const p = '[hidden](../hidden)';",
         "```",
-        "Inline `@/also-hidden` too.",
+        "Inline `[also-hidden](../also-hidden)` too.",
       ].join("\n")
     );
-    expect(scanSkillRefs(root)).toEqual(["@/galgame/section-plan"]);
+    expect(scanSkillRefs(root, "/")).toEqual(["/galgame/section-plan"]);
+  });
+
+  it("resolves relative links against the containing file's path", () => {
+    // from /galgame/section-plan, ../security/SKILL.md → /security
+    const root = parseMarkdown("See [security](../security/SKILL.md).");
+    expect(scanSkillRefs(root, "/galgame/section-plan")).toEqual(["/security"]);
   });
 });
 

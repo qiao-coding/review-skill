@@ -138,14 +138,6 @@ describe.sequential("CLI build", () => {
     expect(status).toBe(1);
     expect(stderr).toContain("ghost");
   });
-
-  it("generates .vscode/skills.code-snippets for @ completion", () => {
-    const snippetsPath = join(root, ".vscode", "skills.code-snippets");
-    expect(existsSync(snippetsPath)).toBe(true);
-    const json = JSON.parse(readFileSync(snippetsPath, "utf-8"));
-    expect(json["@/review/rules.md"]).toBeDefined();
-    expect(json["@/review/rules.md"].prefix).toBe("@/review/rules.md");
-  });
 });
 
 describe("Config loading", () => {

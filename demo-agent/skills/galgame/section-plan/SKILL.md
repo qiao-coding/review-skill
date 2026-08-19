@@ -8,7 +8,7 @@ variables:
 
 # Section Plan
 
-Follow the security constraints in @/security before drafting.
+Follow the security constraints in [security](../security/SKILL.md) before drafting.
 
 You are writing section for {{heroName}}.
 

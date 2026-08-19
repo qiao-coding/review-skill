@@ -23,13 +23,42 @@ function readRuntimePath(baseDir: string, path: string, isSkill: boolean): strin
     : join(baseDir, "runtime", path.replace(/^\//, ""));
 }
 
+// POSIX path math in canonical space ("/foo/bar.md") — deliberately not
+// node:path's join/normalize, which would inject backslashes on Windows.
+
+function posixDirname(path: string): string {
+  const i = path.lastIndexOf("/");
+  return i <= 0 ? "/" : path.slice(0, i);
+}
+
+function joinPosix(base: string, url: string): string {
+  const parts = [...base.split("/"), ...url.split("/")];
+  const out: string[] = [];
+  for (const p of parts) {
+    if (!p || p === ".") continue;
+    if (p === "..") out.pop();
+    else out.push(p);
+  }
+  return "/" + out.join("/");
+}
+
 /**
- * Shared `@/path` reference pattern — single source for both the compiler
- * (scanning/validation in variables.ts) and the runtime `inlineRefs`.
- * Matches `@/path`, `@/path/to/resource.md`, and bare `@/` (root skill);
- * `@`-without-slash (`@user`) is never a reference.
+ * Resolve a markdown link URL to a canonical skill path. `fromPath` is the
+ * canonical path of the containing file (`/react/rules/state.md`). Because
+ * source (`skills/…`) and runtime (`.skill/runtime/…`) share the same relative
+ * structure, a relative link resolves identically in both — one rule for the
+ * compiler and for `bundle()`.
+ *
+ * Returns null when the URL is not a local skill reference: external schemes,
+ * protocol-relative `//`, anchors, mailto. `…/SKILL.md` → the skill path
+ * (drops `/SKILL.md`); resources keep `.md`; a bare directory link stays as-is.
  */
-export const SKILL_REF_PATTERN = "(?<!\\w)@\\/(?:[A-Za-z0-9_/-]+(?:\\.md)?)?";
+export function resolveSkillLink(url: string, fromPath: string): string | null {
+  if (!url || /^(?:https?:|mailto:|tel:|data:|#|\/\/)/.test(url)) return null;
+  const resolved = url.startsWith("/") ? url : joinPosix(posixDirname(fromPath), url);
+  const stripped = resolved.replace(/\/SKILL\.md$/, "");
+  return stripped || "/";
+}
 
 /** Read a compiled runtime file for any path; null when it doesn't exist. */
 function resolveRuntimeFile(baseDir: string, path: string): string | null {
@@ -41,25 +70,33 @@ function resolveRuntimeFile(baseDir: string, path: string): string | null {
   return null;
 }
 
+/** `[text](url)` / `[text](url "title")` — negative lookbehind excludes `![img](url)`. */
+const LINK_RE_SOURCE = "(?<!\\!)\\[[^\\]\\n]*\\]\\(([^)\\s]+)(?:\\s+[\"'][^)]*)?\\)";
+
 /**
- * Recursively inline `@/path` references into a single self-contained document.
- * `resolve(path)` returns the referenced content (or null for unknown paths).
- * `visited` guards against reference cycles — an already-open path is replaced
- * with a `[cycle @/path]` marker instead of recursing forever.
+ * Recursively inline markdown-link references into a single self-contained
+ * document. Each `[text](../path)` is resolved relative to `currentPath` (the
+ * canonical path of the file that contains it) and replaced with the referenced
+ * content, wrapped in the original link as a section marker. `resolve(path)`
+ * returns the referenced content (or null for unknown paths). `visited` guards
+ * against reference cycles — an already-open path is replaced with a
+ * `[cycle url]` marker instead of recursing forever.
  */
 export function inlineRefs(
   content: string,
+  currentPath: string,
   resolve: (path: string) => string | null,
   visited: ReadonlySet<string> = new Set()
 ): string {
-  const re = new RegExp(SKILL_REF_PATTERN, "g");
-  return content.replace(re, (mention) => {
-    const path = mention.slice(1); // strip "@" → "/path"
-    if (visited.has(path)) return `[cycle ${mention}]`;
+  const re = new RegExp(LINK_RE_SOURCE, "g");
+  return content.replace(re, (link, url) => {
+    const path = resolveSkillLink(url, currentPath);
+    if (path == null) return link; // external/anchor — leave as-is
+    if (visited.has(path)) return `[cycle ${path}]`;
     const nested = resolve(path);
-    if (nested == null) return mention; // unknown — leave as-is
+    if (nested == null) return link; // unknown — leave as-is
     const nextVisited = new Set(visited).add(path);
-    return `\n[${mention}]\n${inlineRefs(nested, resolve, nextVisited)}\n[/${mention}]\n`;
+    return `\n${link}\n${inlineRefs(nested, path, resolve, nextVisited)}\n[/${path.replace(/^\//, "")}]\n`;
   });
 }
 
@@ -79,7 +116,7 @@ export function createSkill(
       return content;
     },
     bundle(): string {
-      return inlineRefs(content, (p) => resolveRuntimeFile(baseDir, p));
+      return inlineRefs(content, path, (p) => resolveRuntimeFile(baseDir, p));
     },
   };
 }

@@ -116,8 +116,8 @@ export interface SkillRef {
   /** @deprecated Use .content instead. */
   read(): Promise<string>;
   /**
-   * Single self-contained context: `@/path` references in `.content` are
-   * recursively inlined from compiled runtime files (cycles → `[cycle @/path]`,
+   * Single self-contained context: `[text](../path)` markdown links in `.content`
+   * are recursively inlined from compiled runtime files (cycles → `[cycle url]`,
    * unknown paths left as-is). Sync, no I/O beyond the compiled `.skill/` dir.
    */
   bundle(): string;

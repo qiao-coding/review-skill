@@ -83,7 +83,7 @@ export function readRuntime(runtimeRoot: string, path: string): string | null {
 export function moduleForResource(runtimeRoot: string, path: string): string {
   const content = readRuntime(runtimeRoot, path);
   if (content == null) return `export default ${JSON.stringify("")};\n// not found: @skill${path}\n`;
-  const bundled = inlineRefs(content, (p) => readRuntime(runtimeRoot, p));
+  const bundled = inlineRefs(content, path, (p) => readRuntime(runtimeRoot, p));
   return `export default ${JSON.stringify(bundled)};\n`;
 }
 

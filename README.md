@@ -265,15 +265,24 @@ The legacy object form (`strip: { formatting: false }`) still works but is
 deprecated — the compiler warns with the exact equivalent token array. Migration
 guide: [docs/strip.md](docs/strip.md).
 
-## `@/path` editor tips in markdown
+## References use native markdown links
 
-Skill prose references other skills via `@/path` (e.g. `See @/react`). To get completion + hover preview while editing `.md` files, choose one of two paths:
+Skill prose references other skills with **plain markdown links** — no custom syntax needed:
 
-**Zero-install (default)** — `review-skill --init` writes a `.vscode/settings.json` that (a) drops `@` and `/` from markdown word separators so `@/path` is a single word the generated `skills.code-snippets` can match, and (b) disables `markdown.suggest.paths` — the built-in path completion that fires on `/`, treats `@/` as a relative path, and throws with an empty workspace base. Type `@/` in any markdown file → completion list of every skill path, no extension needed.
+```markdown
+Follow the security constraints in [security](../security/SKILL.md) before drafting.
+See [state rules](../react/rules/state.md) for state management.
+```
 
-**vscode-review-skill extension (fuller UX)** — adds `@` as an automatic completion trigger plus hover preview of the referenced skill's content. VS Code only; run with F5 from `packages/vscode-review-skill` or package a `.vsix`.
+Links resolve **relative to the containing file** in the `skills/` layout, and VS Code handles the editor side natively — path completion as you type, Ctrl+click to jump (including code files), Ctrl+hover to preview, and rendered links in the markdown preview. No extension, no settings, no plugin.
 
-Why both exist: markdown treats `@` and `/` as word separators, so VS Code's built-in snippet matching can never trigger on `@/...` by default — the settings.json tweak makes the generated snippets match (at the cost of the built-in `[text](path)` link-path completion), and the extension bypasses the platform limitation entirely with a `@` trigger character without disabling anything.
+The compiler treats these links as its reference contract:
+
+- **Compile-time validation** — a link whose target doesn't resolve to a known skill/resource is reported as a warning (`Unknown skill reference /path`).
+- **`bundle()`** — recursively inlines the linked content into a single self-contained context (`[text](../path)` … `[/path]` sections), with cycles guarded by `[cycle path]` markers.
+- External URLs (`https://`), anchors, `mailto:`, and images (`![alt](url)`) are never treated as references.
+
+Note: reference-link syntax (`[x][id]` + `[id]: url`) is not yet scanned — use the inline `[x](../path)` form.
 
 ## Links
 

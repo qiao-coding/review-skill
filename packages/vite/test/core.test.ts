@@ -36,7 +36,7 @@ beforeAll(() => {
   );
   writeFileSync(
     join(runtime, "galgame", "section-plan", "SKILL.md"),
-    "# Plan\n\nFollow @/rules/state.md.\n",
+    "# Plan\n\nFollow [rules/state](../rules/state.md).\n",
     "utf-8"
   );
   writeFileSync(join(runtime, "rules", "state.md"), "State rules.\n", "utf-8");
@@ -82,10 +82,11 @@ describe("readRuntime + moduleForResource", () => {
   it("returns null for missing paths", () => {
     expect(readRuntime(runtime, "/missing")).toBeNull();
   });
-  it("inlines @/ refs into a self-contained module", () => {
+  it("inlines markdown links into a self-contained module", () => {
     const src = moduleForResource(runtime, "/galgame/section-plan");
     expect(src).toContain("State rules.");
-    expect(src).toContain("[@/rules/state.md]");
+    expect(src).toContain("[rules/state](../rules/state.md)");
+    expect(src).toContain("[/rules/state.md]");
     expect(src).toContain("export default");
   });
   it("emits an empty module for unknown paths", () => {

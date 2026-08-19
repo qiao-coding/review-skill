@@ -16,7 +16,7 @@ declare module "@skill/meta" {
 }
 
 declare module "@skill/*" {
-  /** Compiled runtime content of one skill/resource, `@/path` refs inlined. */
+  /** Compiled runtime content of one skill/resource, `[text](../path)` links inlined. */
   const content: string;
   export default content;
 }

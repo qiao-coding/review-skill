@@ -65,8 +65,13 @@ export async function compile(
     for (const e of varErrors) errors.push(`${file.relativePath}: ${e}`);
     for (const w of varWarnings) warnings.push(`${file.relativePath}: ${w}`);
 
-    // L2 `@/path` references — collected now, validated against all paths after the loop.
-    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast) });
+    // L2 markdown-link references — collected now, validated against all paths after the loop.
+    const skillPath = file.isSkill
+      ? (file.relativePath.replace(/\/?SKILL\.md$/, "") === ""
+          ? "/"
+          : "/" + file.relativePath.replace(/\/?SKILL\.md$/, ""))
+      : "/" + file.relativePath;
+    refsByFile.push({ relativePath: file.relativePath, refs: scanSkillRefs(ast, skillPath) });
 
     // Strip frontmatter at the source level before transform — transform.ts stays untouched.
     const fm = frontmatterRange(ast);
@@ -77,12 +82,6 @@ export async function compile(
     const runtimeContent = await transformMarkdown(sourceForTransform, strip);
     const runtimeChars = runtimeContent.length;
     const runtimeTokens = estimateTokens(runtimeChars);
-
-    const skillPath = file.isSkill
-      ? (file.relativePath.replace(/\/?SKILL\.md$/, "") === ""
-          ? "/"
-          : "/" + file.relativePath.replace(/\/?SKILL\.md$/, ""))
-      : "/" + file.relativePath;
 
     const entry: SkillMeta = {
       path: skillPath,
@@ -109,11 +108,11 @@ export async function compile(
     throw new Error(errors.join("\n"));
   }
 
-  // L2 — every `@/path` reference must resolve to a known skill/resource path.
+  // L2 — every link reference must resolve to a known skill/resource path.
   const knownPaths = new Set(entries.map((e) => e.path));
   for (const { relativePath, refs } of refsByFile) {
     for (const ref of refs) {
-      if (!knownPaths.has(ref.slice(1))) {
+      if (!knownPaths.has(ref)) {
         warnings.push(`${relativePath}: ${msg("warnUnknownRef", ref)}`);
       }
     }

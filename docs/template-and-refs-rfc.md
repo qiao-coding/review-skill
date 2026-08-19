@@ -132,6 +132,8 @@ export function inject(template: string, vars: Record<string, string>): string
 
 ### L2 片段引用（Markdown 内跨文件 inline）
 
+> **实现状态（2026-08）**：本 RFC 的 `@ref:` 语法未落地。实际实现改用**原生 markdown 链接** `[text](../path)` 作为唯一引用语法——链接相对当前文件解析为规范路径，编译期校验未知引用（warn）+ `bundle()` 运行时递归内联（含循环守卫）。好处：VS Code 对原生链接自带补全/Ctrl+点击跳转/悬停预览，零编辑器扩展。详见顶层 README「References use native markdown links」。
+
 **目标**：消灭 P3（复用）、部分 P4（来源声明）。
 
 **语法**：独占一行的段落 `@ref: <path>`；可选锚点 `@ref: <path>#<heading>`。

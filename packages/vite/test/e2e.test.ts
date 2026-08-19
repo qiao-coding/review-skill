@@ -16,7 +16,7 @@ beforeAll(() => {
 
   writeFileSync(
     join(root, "skills", "galgame", "section-plan", "SKILL.md"),
-    "---\ntitle: Section Plan\ndescription: Chapter\n---\n# Plan\n\nFollow @/rules/state.md.\n",
+    "---\ntitle: Section Plan\ndescription: Chapter\n---\n# Plan\n\nFollow [rules/state](../rules/state.md).\n",
     "utf-8"
   );
   writeFileSync(join(root, "skills", "rules", "state.md"), "---\ntitle: State\n---\nState rules.\n", "utf-8");
@@ -48,9 +48,9 @@ describe("skillFramework through a real vite build", () => {
     const outputs = Array.isArray(result) ? result : [result];
     const chunk = outputs.flatMap((o) => o.output).find((o) => o.type === "chunk");
     const code = chunk?.code ?? "";
-    // Runtime content survived with the @/ ref inlined
+    // Runtime content survived with the markdown link inlined
     expect(code).toContain("State rules.");
-    expect(code).toContain("[@/rules/state.md]");
+    expect(code).toContain("[/rules/state.md]");
     // Frontmatter was stripped by the compiler
     expect(code).not.toContain("description: Chapter");
     // Metadata module is present

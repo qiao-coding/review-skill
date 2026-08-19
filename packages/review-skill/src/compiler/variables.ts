@@ -2,16 +2,11 @@ import { visit } from "unist-util-visit";
 import { parse as parseYaml } from "yaml";
 import type { Root } from "mdast";
 import type { VariableDecl } from "../types.js";
-import { TEMPLATE_VAR_PATTERN, SKILL_REF_PATTERN } from "../skill.js";
+import { TEMPLATE_VAR_PATTERN, resolveSkillLink } from "../skill.js";
 import { msg } from "../i18n.js";
 
 // Anything left inside {{...}} after valid placeholders were removed is malformed.
 const MALFORMED_RE = /\{\{([^{}\n]*)\}\}/g;
-
-// `@/path` cross-skill reference in prose — same pattern the runtime uses to
-// inline bundles (SKILL_REF_PATTERN in skill.ts), so the compiler validates
-// exactly what `bundle()` resolves.
-const REF_RE = new RegExp(SKILL_REF_PATTERN, "g");
 
 export interface FrontmatterRange {
   start: number;
@@ -61,16 +56,17 @@ export function scanTemplateVariables(root: Root): { used: string[]; malformed: 
 }
 
 /**
- * Collect `@/path` cross-skill references from prose (e.g. `@/galgame/section-plan`).
- * Code blocks / inline code / HTML are excluded automatically, same as
- * `scanTemplateVariables`. The `@` must be directly followed by `/`, so bare
- * `@user` mentions are never treated as skill references.
+ * Collect cross-skill references from markdown links (e.g. `[state rules](../react/rules/state.md)`),
+ * resolved to canonical skill paths relative to `fromPath` (the canonical path
+ * of the containing file). Only `link` nodes are visited — code blocks, inline
+ * code, HTML and images are separate node types, so they are never treated as
+ * references. External URLs / anchors / mailto are skipped by `resolveSkillLink`.
  */
-export function scanSkillRefs(root: Root): string[] {
+export function scanSkillRefs(root: Root, fromPath: string): string[] {
   const refs = new Set<string>();
-  const re = new RegExp(REF_RE.source, "g");
-  visit(root, "text", (node) => {
-    for (const m of ((node as any).value as string).matchAll(re)) refs.add(m[0]);
+  visit(root, "link", (node) => {
+    const path = resolveSkillLink((node as any).url as string, fromPath);
+    if (path != null) refs.add(path);
   });
   return [...refs];
 }
