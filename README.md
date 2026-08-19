@@ -1,6 +1,6 @@
 # review-skill
 
-A TypeScript-first skill framework for Markdown Agent Skills — author skills in Markdown, compile once, consume them as typed imports. Type-safe references, token-aware runtime, zero IDE plugins.
+A TypeScript-first skill framework for Markdown Agent Skills — author skills in Markdown, compile once, consume them as typed imports. Type-safe references, self-contained runtime, zero IDE plugins.
 
 ![review-skill overview](assets/review-skill-overview.png)
 
@@ -76,7 +76,7 @@ npx review-skill
 
 ```text
 Compiled 6 files in 91ms
-  3 skills | Source 2145 -> Runtime 1751 tokens | -18.4%
+  3 skills · self-contained typed runtime
 ```
 
 ### 4. Consume

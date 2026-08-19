@@ -214,12 +214,7 @@ async function build() {
     }
 
     const skills = result.entries.filter((e) => e.isSkill);
-    const reduction = result.sourceTokens - result.runtimeTokens;
-    const rate = result.sourceTokens > 0
-      ? ((reduction / result.sourceTokens) * 100).toFixed(1)
-      : "0.0";
-
-    console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length, result.sourceTokens, result.runtimeTokens, rate));
+    console.log(msg("buildResult", result.entries.length, Date.now() - start, skills.length));
   } catch (err) {
     // Variable-contract violations and other compile errors → nonzero exit.
     console.error(msg("buildError", err instanceof Error ? err.message : String(err)));

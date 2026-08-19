@@ -1,6 +1,6 @@
 # review-skill
 
-TypeScript-first Skill 框架 — 用 Markdown 编写 skill，编译一次，以类型化导入消费。类型安全引用、Token 统计、零 IDE 插件。
+TypeScript-first Skill 框架 — 用 Markdown 编写 skill，编译一次，以类型化导入消费。类型安全引用、自包含运行时、零 IDE 插件。
 
 ![review-skill 项目概览](assets/review-skill-overview.png)
 
@@ -76,7 +76,7 @@ npx review-skill
 
 ```text
 Compiled 6 files in 91ms
-  3 skills | Source 2145 -> Runtime 1751 tokens | -18.4%
+  3 skills · self-contained typed runtime
 ```
 
 ### 4. 消费

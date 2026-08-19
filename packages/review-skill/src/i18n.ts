@@ -22,8 +22,8 @@ Config: skill.config.js (optional)
     initTsconfig: "Add @review-skill/skill path alias to tsconfig.json",
     initScripts: "Add scripts to package.json",
     initDependency: "Add review-skill to package.json dependencies",
-    buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
-      `Compiled ${files} files in ${ms}ms\n  ${skills} skills  |  Source ${src} → Runtime ${rt} tokens  |  -${rate}%\n`,
+    buildResult: (files: number, ms: number, skills: number) =>
+      `Compiled ${files} files in ${ms}ms\n  ${skills} skills · self-contained typed runtime — consume via @review-skill/skill\n`,
     watchStart: (dir: string) => `Watching ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] Rebuilding...`,
     errorSkillNotFound: (path: string) =>
@@ -65,8 +65,8 @@ Config: skill.config.js (optional)
     initTsconfig: "添加 @review-skill/skill 路径别名到 tsconfig.json",
     initScripts: "添加 scripts 到 package.json",
     initDependency: "添加 review-skill 到 package.json 依赖",
-    buildResult: (files: number, ms: number, skills: number, src: number, rt: number, rate: string) =>
-      `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill  |  源文件 ${src} → 运行时 ${rt} tokens  |  -${rate}%\n`,
+    buildResult: (files: number, ms: number, skills: number) =>
+      `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill · 自包含类型化运行时 —— 通过 @review-skill/skill 消费\n`,
     watchStart: (dir: string) => `正在监听 ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] 重新编译中...`,
     errorSkillNotFound: (path: string) =>
