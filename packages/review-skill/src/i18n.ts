@@ -26,6 +26,7 @@ Config: skill.config.js (optional)
       `Compiled ${files} files in ${ms}ms\n  ${skills} skills · self-contained typed runtime — consume via @review-skill/skill\n`,
     buildCompiling: "Compiling…",
     buildDeps: "Skill dependency tree:",
+    buildInjected: (tokens: number) => `  Estimated runtime injection: ~${tokens} tokens\n`,
     watchStart: (dir: string) => `Watching ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] Rebuilding...`,
     errorSkillNotFound: (path: string) =>
@@ -71,6 +72,7 @@ Config: skill.config.js (optional)
       `编译了 ${files} 个文件，耗时 ${ms}ms\n  ${skills} 个 skill · 自包含类型化运行时 —— 通过 @review-skill/skill 消费\n`,
     buildCompiling: "编译中…",
     buildDeps: "Skill 依赖树:",
+    buildInjected: (tokens: number) => `  预计运行时注入: ~${tokens} tokens\n`,
     watchStart: (dir: string) => `正在监听 ${dir}/**/*.md...\n`,
     watchRebuild: (time: string) => `[${time}] 重新编译中...`,
     errorSkillNotFound: (path: string) =>

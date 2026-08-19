@@ -236,20 +236,25 @@ async function build() {
       console.log(`⚠ ${w}`);
     }
 
-    // Skill dependency tree — who references what (the routing graph).
+    // Skill dependency tree — who references what (the routing graph), each
+    // node annotated with its estimated runtime-injection tokens.
+    const tokenByPath = new Map(result.entries.map((e) => [e.path, e.runtime.tokens]));
     const withRefs = result.deps.filter((d) => d.refs.length);
     if (withRefs.length) {
       console.log(`\n${msg("buildDeps")}`);
       for (const { path, refs } of withRefs) {
-        console.log(`  ${path}`);
+        const tok = tokenByPath.get(path);
+        console.log(`  ${path}${tok != null ? ` · ~${tok} tokens` : ""}`);
         for (let i = 0; i < refs.length; i++) {
-          console.log(`    ${i === refs.length - 1 ? "└─" : "├─"} ${refs[i]}`);
+          const rtok = tokenByPath.get(refs[i]);
+          console.log(`    ${i === refs.length - 1 ? "└─" : "├─"} ${refs[i]}${rtok != null ? ` · ~${rtok} tokens` : ""}`);
         }
       }
     }
 
     const skills = result.entries.filter((e) => e.isSkill);
     console.log(`\n${msg("buildResult", result.entries.length, Date.now() - start, skills.length)}`);
+    console.log(msg("buildInjected", result.runtimeTokens));
   } catch (err) {
     if (spinner) clearInterval(spinner);
     clearLine();
